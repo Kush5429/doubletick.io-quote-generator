@@ -2539,112 +2539,111 @@ Rules: No preamble. No closing line. Start directly with "${pair[0]}:". Each fie
             <>
               <StepHead title="Plan & Billing" sub="Choose the billing cycle and DoubleTick plan to propose." />
               <PanelCard>
-                <FField label="Billing Cycle">
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 10, marginTop: 4 }}>
+                {/* ── VARIANT A: Segmented billing pill ── */}
+                <div style={{ marginBottom: 6 }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.6px", color: "#64748b", textTransform: "uppercase", marginBottom: 10 }}>Billing Cycle</div>
+                  <div style={{ display: "flex", background: "#0b1520", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 12, padding: 4, gap: 2 }}>
                     {[
                       ["monthly", "Monthly", "Custom / Approval"],
                       ["quarterly", "Quarterly", "Standard"],
                       ["halfYearly", "Bi-Annual", "6 Months"],
                       ["yearly", "Yearly", "Best Value"],
                     ].map(([b, label, badge]) => (
-                      <div key={b} onClick={() => { setBilling(b); setAddonQty({}); }} style={{ padding: "13px 12px", borderRadius: 10, border: `1.5px solid ${billing === b ? T.green : T.border}`, background: billing === b ? "rgba(23,160,102,0.07)" : "#0d1520", cursor: "pointer", textAlign: "center", transition: "all 0.15s" }}>
-                        <div style={{ fontWeight: 600, fontSize: 14, color: billing === b ? T.greenLt : T.textSub }}>{label}</div>
-                        <div style={{ fontSize: 10.5, color: billing === b ? T.greenLt : T.textMuted, marginTop: 3, fontWeight: 500 }}>{badge}</div>
+                      <div key={b} onClick={() => { setBilling(b); setAddonQty({}); }} style={{ flex: 1, padding: "10px 8px", borderRadius: 9, cursor: "pointer", textAlign: "center", background: billing === b ? "rgba(23,160,102,0.12)" : "transparent", transition: "all 0.18s" }}>
+                        <div style={{ fontSize: 13, fontWeight: 600, color: billing === b ? T.greenLt : "#64748b", transition: "color 0.18s" }}>{label}</div>
+                        <div style={{ fontSize: 10, color: billing === b ? "rgba(74,222,128,0.6)" : "#374151", marginTop: 3 }}>{badge}</div>
                       </div>
                     ))}
                   </div>
-                  {billing === "monthly" && <div style={{ marginTop: 10, padding: "9px 14px", background: "rgba(245,158,11,0.1)", border: "1px solid rgba(245,158,11,0.3)", borderRadius: 8, fontSize: 12, color: "#f59e0b" }}>{plan === "enterprise" ? "Enterprise monthly pricing is custom — enter the agreed amount below." : "Monthly billing for Starter / Pro requires management approval before sending."}</div>}
-                  {billing === "quarterly" && plan === "enterprise" && <div style={{ marginTop: 10, padding: "9px 14px", background: "rgba(245,158,11,0.1)", border: "1px solid rgba(245,158,11,0.3)", borderRadius: 8, fontSize: 12, color: "#f59e0b" }}>Enterprise quarterly pricing is custom — enter the agreed quarterly amount below.</div>}
-                  {billing === "yearly" && plan === "enterprise" && <div style={{ marginTop: 10, padding: "9px 14px", background: "rgba(245,158,11,0.1)", border: "1px solid rgba(245,158,11,0.3)", borderRadius: 8, fontSize: 12, color: "#f59e0b" }}>Enterprise yearly pricing is custom — enter the agreed annual amount below.</div>}
-                </FField>
-
-                <div style={{ marginTop: 22 }}>
-                  <FField label="Plan">
-                    <div style={{ display: "grid", gap: 10, marginTop: 4 }}>
-                      {Object.entries(PLANS).map(([key, p]) => {
-                        const isEnt = key === "enterprise";
-                        const basePrice = isEnt ? (parseInt(enterpriseCustomPrice.replace(/[^0-9]/g, ""), 10) || null) : (p[billing] ?? p.quarterly);
-                        const aiExtra = isEnt && enterpriseAIBots ? (billing === "quarterly" ? 45000 : billing === "yearly" ? 180000 : 15000) : 0;
-                        const displayPrice = basePrice != null ? basePrice + aiExtra : null;
-                        const isSelected = plan === key;
-                        const billingShort = billing === "monthly" ? "mo" : billing === "quarterly" ? "qtr" : "yr";
-                        return (
-                          <div key={key}>
-                            <div onClick={() => setPlan(key)} style={{ padding: "16px 20px", borderRadius: 10, border: `1.5px solid ${isSelected ? T.green : T.border}`, background: isSelected ? "rgba(23,160,102,0.06)" : T.surface, cursor: "pointer", transition: "all 0.15s" }}>
-                              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                                <div style={{ flex: 1 }}>
-                                  <div style={{ fontWeight: 700, fontSize: 15, color: isSelected ? T.greenLt : T.text }}>{p.name}</div>
-                                  <div style={{ fontSize: 12, color: T.textMuted, marginTop: 3 }}>{p.subtitle}</div>
-                                </div>
-                                {isEnt ? (
-                                  <div style={{ marginLeft: 16, flexShrink: 0, textAlign: "right" }}>
-                                    <div style={{ fontSize: 11, color: T.textMuted, marginBottom: 5 }}>Custom {billing} price</div>
-                                    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                                      <span style={{ fontSize: 15, fontWeight: 700, color: T.white }}>₹</span>
-                                      <input value={enterpriseCustomPrice} onChange={e => setEnterpriseCustomPrice(e.target.value)} onClick={e => e.stopPropagation()} placeholder="e.g. 45,000" style={{ width: 110, padding: "6px 10px", background: "#0d1520", border: `1.5px solid ${T.green}`, borderRadius: 7, color: T.white, fontSize: 14, fontWeight: 700, outline: "none", fontFamily: "inherit" }} />
-                                      <span style={{ fontSize: 11, color: T.textMuted }}>/{billingShort}</span>
-                                    </div>
-                                    {enterpriseCustomPrice && <div style={{ fontSize: 11, color: T.textMuted, marginTop: 2 }}>{!discount && `+GST · ₹${fmtINR(Math.round((parseInt(enterpriseCustomPrice.replace(/[^0-9]/g,""),10)||0)*1.18))} total`}</div>}
-                                    <div style={{ fontSize: 10.5, color: enterpriseAIBots ? T.greenLt : T.textMuted, marginTop: 3 }}>{enterpriseAIBots ? `+₹${billing==="yearly"?"1,80,000":billing==="quarterly"?"45,000":"15,000"} AI Bots` : "without AI Bots"}</div>
-                                  </div>
-                                ) : (
-                                  <div style={{ textAlign: "right", marginLeft: 16, flexShrink: 0 }}>
-                                    {discount > 0 && <div style={{ fontSize: 12, color: T.textMuted, textDecoration: "line-through", marginBottom: 1 }}>₹{fmtINR(displayPrice ?? 0)}</div>}
-                                    <div style={{ fontWeight: 700, fontSize: 19, color: discount > 0 ? T.greenLt : T.white }}>₹{fmtINR(Math.round((displayPrice ?? 0) * (1 - discount / 100)))}</div>
-                                    {discount > 0 && <div style={{ fontSize: 10.5, color: T.greenLt, fontWeight: 600, marginTop: 1 }}>{discount}% off applied</div>}
-                                    <div style={{ fontSize: 11, color: T.textMuted, marginTop: 2 }}>+GST · ₹{fmtINR(Math.round(Math.round((displayPrice ?? 0) * (1 - discount / 100)) * 1.18))} total</div>
-                                  </div>
-                                )}
-                              </div>
-
-                              {/* Enterprise tier badge — shows feature eligibility live as price is typed */}
-                              {isEnt && isSelected && enterpriseCustomPrice && (
-                                <EnterpriseTierBadge customPrice={enterpriseCustomPrice} billing={billing} />
-                              )}
-                            </div>
-
-                            {isSelected && isEnt && (
-                              <div style={{ marginTop: 8, padding: "12px 16px", background: T.surfaceHigh, borderRadius: 9, border: `1px solid ${T.borderMed}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                <div>
-                                  <div style={{ fontSize: 13.5, fontWeight: 600, color: T.text }}>Include AI Chat Bots?</div>
-                                  <div style={{ fontSize: 11.5, color: T.textMuted, marginTop: 2 }}>+₹15,000/month · Requires ChatGPT Plus subscription</div>
-                                </div>
-                                <div style={{ display: "flex", gap: 8 }}>
-                                  <button onClick={e => { e.stopPropagation(); setEnterpriseAIBots(false); }} style={{ padding: "6px 14px", borderRadius: 6, border: `1.5px solid ${!enterpriseAIBots ? T.green : T.border}`, background: !enterpriseAIBots ? "rgba(23,160,102,0.1)" : "transparent", color: !enterpriseAIBots ? T.greenLt : T.textSub, cursor: "pointer", fontSize: 12.5, fontWeight: 600 }}>No</button>
-                                  <button onClick={e => { e.stopPropagation(); setEnterpriseAIBots(true); }} style={{ padding: "6px 14px", borderRadius: 6, border: `1.5px solid ${enterpriseAIBots ? T.green : T.border}`, background: enterpriseAIBots ? "rgba(23,160,102,0.1)" : "transparent", color: enterpriseAIBots ? T.greenLt : T.textSub, cursor: "pointer", fontSize: 12.5, fontWeight: 600 }}>Yes</button>
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </FField>
+                  {billing === "monthly" && <div style={{ marginTop: 8, padding: "8px 13px", background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.25)", borderRadius: 8, fontSize: 11.5, color: "#f59e0b" }}>{plan === "enterprise" ? "Enterprise monthly pricing is custom — enter the agreed amount below." : "Monthly billing requires management approval before sending."}</div>}
                 </div>
 
-                {/* ── EDITABLE FEATURES PANEL ── */}
-                <div style={{ marginTop: 18, padding: "16px 18px", background: T.surfaceHigh, borderRadius: 11, border: `1px solid ${T.border}` }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-                    <div>
-                      <div style={{ fontSize: 13.5, fontWeight: 600, color: T.text }}>Included Features</div>
-                      <div style={{ fontSize: 11.5, color: T.textMuted, marginTop: 2 }}>
-                        {customFeatures ? "Manually edited · " : "Auto-computed from price · "}
-                        <span style={{ color: T.greenLt, cursor: "pointer", textDecoration: "underline" }} onClick={() => setCustomFeatures(null)}>Reset to auto</span>
-                      </div>
-                    </div>
-                    {customFeatures && (
-                      <span style={{ fontSize: 10.5, background: "rgba(23,160,102,0.15)", color: T.greenLt, padding: "3px 10px", borderRadius: 20, fontWeight: 600 }}>Edited</span>
-                    )}
+                {/* ── VARIANT A: 3-column horizontal plan cards ── */}
+                <div style={{ marginTop: 20 }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.6px", color: "#64748b", textTransform: "uppercase", marginBottom: 10 }}>Plan</div>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
+                    {Object.entries(PLANS).map(([key, p]) => {
+                      const isEnt = key === "enterprise";
+                      const basePrice = isEnt ? (parseInt(enterpriseCustomPrice.replace(/[^0-9]/g, ""), 10) || null) : (p[billing] ?? p.quarterly);
+                      const aiExtra = isEnt && enterpriseAIBots ? (billing === "quarterly" ? 45000 : billing === "yearly" ? 180000 : 15000) : 0;
+                      const displayPrice = basePrice != null ? basePrice + aiExtra : null;
+                      const isSelected = plan === key;
+                      const billingShort = billing === "monthly" ? "mo" : billing === "quarterly" ? "qtr" : billing === "halfYearly" ? "6mo" : "yr";
+                      const discountedPrice = Math.round((displayPrice ?? 0) * (1 - discount / 100));
+                      return (
+                        <div key={key} style={{ position: "relative" }}>
+                          <div onClick={() => setPlan(key)} style={{ border: `1.5px solid ${isSelected ? T.green : "rgba(255,255,255,0.07)"}`, borderRadius: 14, padding: "16px 14px", cursor: "pointer", background: isSelected ? "rgba(13,31,19,0.9)" : "#0f1822", transition: "all 0.18s", height: "100%" }}>
+                            {/* Radio indicator */}
+                            <div style={{ width: 16, height: 16, borderRadius: "50%", border: `1.5px solid ${isSelected ? T.green : "rgba(255,255,255,0.2)"}`, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 12, transition: "all 0.15s" }}>
+                              <div style={{ width: 8, height: 8, borderRadius: "50%", background: T.green, transform: isSelected ? "scale(1)" : "scale(0)", transition: "transform 0.15s" }} />
+                            </div>
+                            {key === "pro" && <div style={{ position: "absolute", top: 12, right: 12, fontSize: 9, fontWeight: 700, padding: "3px 7px", borderRadius: 5, background: "rgba(167,139,250,0.12)", color: "#a78bfa", border: "1px solid rgba(167,139,250,0.25)", letterSpacing: "0.3px" }}>POPULAR</div>}
+                            <div style={{ fontSize: 15, fontWeight: 700, color: "#f1f5f9", marginBottom: 3 }}>{p.name}</div>
+                            <div style={{ fontSize: 11, color: "#64748b", marginBottom: 14, lineHeight: 1.4 }}>{p.subtitle}</div>
+                            {isEnt ? (
+                              <div>
+                                <div style={{ fontSize: 11, color: "#64748b", marginBottom: 6 }}>Custom {billing} price</div>
+                                <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                                  <span style={{ fontSize: 14, fontWeight: 700, color: T.white }}>₹</span>
+                                  <input value={enterpriseCustomPrice} onChange={e => setEnterpriseCustomPrice(e.target.value)} onClick={e => e.stopPropagation()} placeholder="45,000" style={{ width: "100%", padding: "6px 8px", background: "#0d1520", border: `1.5px solid ${T.green}`, borderRadius: 7, color: T.white, fontSize: 14, fontWeight: 700, outline: "none", fontFamily: "inherit" }} />
+                                </div>
+                                {enterpriseCustomPrice && <div style={{ fontSize: 10, color: "#64748b", marginTop: 4 }}>/{billingShort} · +GST ₹{fmtINR(Math.round((parseInt(enterpriseCustomPrice.replace(/[^0-9]/g,""),10)||0)*1.18))} total</div>}
+                                <div style={{ fontSize: 10, color: enterpriseAIBots ? T.greenLt : "#475569", marginTop: 3 }}>{enterpriseAIBots ? `+₹${billing==="yearly"?"1,80,000":billing==="quarterly"?"45,000":"15,000"} AI Bots` : "without AI Bots"}</div>
+                              </div>
+                            ) : (
+                              <div>
+                                {discount > 0 && <div style={{ fontSize: 11, color: "#475569", textDecoration: "line-through", marginBottom: 2 }}>₹{fmtINR(displayPrice ?? 0)}</div>}
+                                <div style={{ fontSize: 22, fontWeight: 800, color: isSelected ? T.greenLt : "#f8fafc", letterSpacing: "-0.5px" }}>₹{fmtINR(discountedPrice)}</div>
+                                {discount > 0 && <div style={{ fontSize: 10, color: T.greenLt, fontWeight: 600, marginTop: 1 }}>{discount}% off</div>}
+                                <div style={{ fontSize: 10.5, color: "#64748b", marginTop: 3 }}>+GST · ₹{fmtINR(Math.round(discountedPrice * 1.18))} total</div>
+                              </div>
+                            )}
+                            {isEnt && isSelected && enterpriseCustomPrice && (
+                              <EnterpriseTierBadge customPrice={enterpriseCustomPrice} billing={billing} />
+                            )}
+                          </div>
+                          {/* Enterprise AI Bots toggle below card when selected */}
+                          {isSelected && isEnt && (
+                            <div style={{ marginTop: 8, padding: "11px 14px", background: T.surfaceHigh, borderRadius: 9, border: `1px solid ${T.borderMed}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                              <div>
+                                <div style={{ fontSize: 12.5, fontWeight: 600, color: T.text }}>AI Chat Bots?</div>
+                                <div style={{ fontSize: 10.5, color: T.textMuted, marginTop: 1 }}>+₹15k/mo · ChatGPT Plus req.</div>
+                              </div>
+                              <div style={{ display: "flex", gap: 6 }}>
+                                <button onClick={e => { e.stopPropagation(); setEnterpriseAIBots(false); }} style={{ padding: "5px 12px", borderRadius: 6, border: `1.5px solid ${!enterpriseAIBots ? T.green : T.border}`, background: !enterpriseAIBots ? "rgba(23,160,102,0.1)" : "transparent", color: !enterpriseAIBots ? T.greenLt : T.textSub, cursor: "pointer", fontSize: 12, fontWeight: 600 }}>No</button>
+                                <button onClick={e => { e.stopPropagation(); setEnterpriseAIBots(true); }} style={{ padding: "5px 12px", borderRadius: 6, border: `1.5px solid ${enterpriseAIBots ? T.green : T.border}`, background: enterpriseAIBots ? "rgba(23,160,102,0.1)" : "transparent", color: enterpriseAIBots ? T.greenLt : T.textSub, cursor: "pointer", fontSize: 12, fontWeight: 600 }}>Yes</button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
-                  <div style={{ display: "grid", gap: 5, marginBottom: 12 }}>
+                </div>
+
+                {/* ── VARIANT A: Features box ── */}
+                <div style={{ marginTop: 18, background: "#0f1822", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 14, overflow: "hidden" }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "13px 18px", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+                    <div style={{ fontSize: 12, fontWeight: 700, color: "#94a3b8", letterSpacing: "0.3px", textTransform: "uppercase" }}>Included Features</div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                      <span style={{ fontSize: 11, color: "#475569" }}>{customFeatures ? "Manually edited" : "Auto-computed from price"}</span>
+                      <button onClick={() => setCustomFeatures(null)} style={{ fontSize: 11, color: T.greenLt, cursor: "pointer", textDecoration: "none", background: "none", border: "none", padding: 0, fontFamily: "inherit" }}>Reset to auto</button>
+                      {customFeatures && <span style={{ fontSize: 10, background: "rgba(23,160,102,0.15)", color: T.greenLt, padding: "2px 8px", borderRadius: 20, fontWeight: 600 }}>Edited</span>}
+                    </div>
+                  </div>
+                  <div style={{ padding: "6px 10px 2px" }}>
                     {enterpriseFeatures.map((f, i) => (
-                      <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, padding: "7px 10px", background: "#0d1520", borderRadius: 7, border: `1px solid ${T.border}` }}>
-                        <span style={{ color: T.greenLt, fontSize: 10, flexShrink: 0 }}>▶</span>
-                        <span style={{ fontSize: 12.5, color: T.text, flex: 1 }}>{f}</span>
+                      <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, padding: "7px 8px", borderRadius: 7, transition: "background 0.12s" }}
+                        onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.03)"}
+                        onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
+                        <div style={{ width: 6, height: 6, borderRadius: "50%", background: T.green, flexShrink: 0 }} />
+                        <span style={{ flex: 1, fontSize: 13, color: "#cbd5e1" }}>{f}</span>
                         <button
                           onClick={() => setCustomFeatures((enterpriseFeatures).filter((_, fi) => fi !== i))}
-                          style={{ background: "none", border: "none", color: "#f87171", cursor: "pointer", fontSize: 13, padding: "0 2px", lineHeight: 1, flexShrink: 0 }}
+                          style={{ background: "none", border: "none", color: "#ef4444", cursor: "pointer", fontSize: 13, padding: "0 2px", lineHeight: 1, flexShrink: 0, opacity: 0.7 }}
                           title="Remove feature"
+                          onMouseEnter={e => e.currentTarget.style.opacity = "1"}
+                          onMouseLeave={e => e.currentTarget.style.opacity = "0.7"}
                         >✕</button>
                       </div>
                     ))}
