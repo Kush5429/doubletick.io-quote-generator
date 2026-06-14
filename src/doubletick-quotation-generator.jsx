@@ -87,7 +87,7 @@ function getEnterpriseFeatures(customPrice, billing) {
 // ─── PLANS ────────────────────────────────────────────────────────────────────
 const PLANS = {
   standard: {
-    name: "Standard",
+    name: "Starter",
     subtitle: "Bulk Messaging + Google Sheets",
     monthly: 6840, quarterly: 15480, halfYearly: 30960, yearly: 36000,
     monthlyNote: "Requires management approval",
@@ -98,7 +98,7 @@ const PLANS = {
     subtitle: "Bulk Messaging + Chatbots + Integrations",
     monthly: 9960, quarterly: 21600, halfYearly: 43200, yearly: 50400,
     monthlyNote: "Requires management approval",
-    features: ["Everything in Standard plan", "Team inbox (10 agents free)", "Roles & permissions", "Number masking", "Automated ordering bot", "3rd party integrations", "Developer API", "Agent & Organisation Analytics", "Reports", "30 custom attributes", "5 WhatsApp Groups included"],
+    features: ["Everything in Starter plan", "Team inbox (10 agents free)", "Roles & permissions", "Number masking", "Automated ordering bot", "3rd party integrations", "Developer API", "Agent & Organisation Analytics", "Reports", "30 custom attributes", "5 WhatsApp Groups included"],
   },
   enterprise: {
     name: "Enterprise",
@@ -154,10 +154,18 @@ const ADDON_CATALOG = [
     label: "Instagram DM Integration",
     desc: "Manage Instagram DMs alongside WhatsApp in a unified inbox. Supports media sharing and real-time replies.",
     plans: ["pro", "enterprise", "standard"],
-    monthly: null, quarterly: null, halfYearly: null, yearly: null,
-    custom: "Custom Pricing",
+    monthly: 2400, quarterly: 7200, halfYearly: 14400, yearly: 28800,
     perUnit: false,
     isInstagram: true,
+  },
+  {
+    id: "wa_calling",
+    group: "Platform Features",
+    label: "WhatsApp Calling",
+    desc: "Incoming WhatsApp calls with automatic recording, call logs, and multi-call handling — all within WhatsApp. Calling cost: doubletick.io/conversation-cost",
+    plans: ["pro", "enterprise"],
+    monthly: 3600, quarterly: 10800, halfYearly: 21600, yearly: 43200,
+    perUnit: false,
   },
   // ── USERS & NUMBERS ────────────────────────────────────────────────────────
   {
@@ -363,6 +371,22 @@ const ADDON_CATALOG = [
     plans: ["pro", "enterprise", "standard"],
     monthly: null, quarterly: null, halfYearly: null, yearly: null,
     custom: "₹2 / daily summary",
+    perUnit: false,
+  },
+  // ── CALLING INFRASTRUCTURE ─────────────────────────────────────────────────
+  {
+    id: "pstn",
+    group: "Calling Infrastructure",
+    label: "PSTN Click-to-Call",
+    desc: "Full outbound calling suite with recordings, transcripts, AI summaries, and agent analytics. Powered by DoubleTick + Tata Tele SIP channels. Tata Tele charges (₹700/channel/month) paid directly to TTBS.",
+    plans: ["pro", "enterprise"],
+    monthly: null, quarterly: null, halfYearly: null, yearly: null,
+    custom: "Per-channel pricing",
+    perChannel: true,
+    dtFeePerChannelPerMonth: 150,
+    aiCallingFeePerMin: 5,
+    callingRatePerMin: 0.40,
+    ttbsFeePerChannelPerMonth: 700,
     perUnit: false,
   },
 ];
@@ -1090,13 +1114,15 @@ export default function App() {
     { week: "Week 3", title: "Go-Live & Training", desc: "Team training completed, first broadcasts sent, live support active" },
     { week: "Week 4", title: "Optimisation", desc: "Performance review, campaign tuning, CSM handover completed" },
   ]);
+  const [pstnChannels, setPstnChannels] = useState(1);
+  const [pstnAICalling, setPstnAICalling] = useState(false);
   const logoRef = useRef();
   const docRef = useRef();
 
   const planData = PLANS[plan];
   const isEnterpriseCustom = plan === "enterprise";
   // effectiveBilling = billing (same)
-  const effectiveBillingLabel = { monthly: "Monthly", quarterly: "Quarterly", halfYearly: "Half-Yearly", yearly: "Yearly" }[billing] ?? "Quarterly";
+  const effectiveBillingLabel = { monthly: "Monthly", quarterly: "Quarterly", halfYearly: "Bi-Annual", yearly: "Yearly" }[billing] ?? "Quarterly";
 
   // Auto-computed features (recalculate when price/billing changes)
   const autoFeatures = isEnterpriseCustom
@@ -1362,6 +1388,7 @@ Rules: No preamble. No closing line. Start directly with "${pair[0]}:". Each fie
   const getQty = (id) => addonQty[id] || 1;
 
   const getAddonLinePrice = (a) => {
+    if (a.id === "pstn") return a.dtFeePerChannelPerMonth * pstnChannels;
     if (a.custom) return null;
     const unit = getAddonUnitPrice(a, plan, billing);
     if (unit == null) return null;
@@ -2517,7 +2544,7 @@ Rules: No preamble. No closing line. Start directly with "${pair[0]}:". Each fie
                     {[
                       ["monthly", "Monthly", "Custom / Approval"],
                       ["quarterly", "Quarterly", "Standard"],
-                      ...(plan === "enterprise" ? [["halfYearly", "Half-Yearly", "Enterprise Only"]] : []),
+                      ["halfYearly", "Bi-Annual", "6 Months"],
                       ["yearly", "Yearly", "Best Value"],
                     ].map(([b, label, badge]) => (
                       <div key={b} onClick={() => { setBilling(b); setAddonQty({}); }} style={{ padding: "13px 12px", borderRadius: 10, border: `1.5px solid ${billing === b ? T.green : T.border}`, background: billing === b ? "rgba(23,160,102,0.07)" : "#0d1520", cursor: "pointer", textAlign: "center", transition: "all 0.15s" }}>
@@ -2667,7 +2694,7 @@ Rules: No preamble. No closing line. Start directly with "${pair[0]}:". Each fie
               <StepHead title="Add-on Features" sub={`Add-ons for DoubleTick ${planData.name} · ${effectiveBillingLabel} billing`} />
               <PanelCard>
                 {/* Group addons by group label */}
-                {["Platform Features", "Users & Numbers", "Integrations", "Platform Extras", "One-Time & Usage"].map(groupName => {
+                {["Platform Features", "Users & Numbers", "Integrations", "Platform Extras", "One-Time & Usage", "Calling Infrastructure"].map(groupName => {
                   const groupItems = planAddons.filter(a => a.group === groupName);
                   if (groupItems.length === 0) return null;
                   return (
@@ -2716,6 +2743,25 @@ Rules: No preamble. No closing line. Start directly with "${pair[0]}:". Each fie
                                   )}
                                 </div>
                               </div>
+                              {/* PSTN configurator */}
+                              {a.id === "pstn" && on && (
+                                <div style={{ marginTop: 8, padding: "10px 12px", background: "rgba(255,255,255,0.05)", borderRadius: 8, border: "1px solid rgba(255,255,255,0.08)" }}>
+                                  <div style={{ fontSize: 12, color: "#9ca3af", marginBottom: 6 }}>Configure Channels</div>
+                                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+                                    <span style={{ fontSize: 12, color: "#d1d5db" }}>Channels:</span>
+                                    <button onClick={() => setPstnChannels(Math.max(1, pstnChannels - 1))} style={{ width: 24, height: 24, borderRadius: 4, border: "1px solid #374151", background: "#1f2937", color: "#fff", cursor: "pointer", fontSize: 14 }}>−</button>
+                                    <span style={{ fontSize: 14, fontWeight: 600, color: "#fff", minWidth: 24, textAlign: "center" }}>{pstnChannels}</span>
+                                    <button onClick={() => setPstnChannels(pstnChannels + 1)} style={{ width: 24, height: 24, borderRadius: 4, border: "1px solid #374151", background: "#1f2937", color: "#fff", cursor: "pointer", fontSize: 14 }}>+</button>
+                                  </div>
+                                  <div style={{ fontSize: 11, color: "#6b7280", marginBottom: 4 }}>DoubleTick fee: ₹{pstnChannels * 150}/month ({pstnChannels} × ₹150)</div>
+                                  <div style={{ fontSize: 11, color: "#f59e0b" }}>Tata Tele: ₹{pstnChannels * 700}/month — paid directly to TTBS (not in quote)</div>
+                                  <label style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 8, cursor: "pointer" }}>
+                                    <input type="checkbox" checked={pstnAICalling} onChange={(e) => setPstnAICalling(e.target.checked)} style={{ accentColor: "#10b981" }} />
+                                    <span style={{ fontSize: 12, color: "#d1d5db" }}>Add AI Calling (+₹5/min)</span>
+                                  </label>
+                                  {pstnAICalling && <div style={{ fontSize: 11, color: "#6b7280", marginTop: 4 }}>Calling charges: ₹0.40/min + AI: ₹5/min</div>}
+                                </div>
+                              )}
                               {/* Quantity row */}
                               {on && a.perUnit && unitPrice != null && (
                                 <div style={{ borderTop: `1px solid ${T.border}`, padding: "10px 16px", background: "rgba(23,160,102,0.04)", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
@@ -2792,7 +2838,7 @@ Rules: No preamble. No closing line. Start directly with "${pair[0]}:". Each fie
                     <select value={newCustomAddon.billing} onChange={e => setNewCustomAddon(p => ({ ...p, billing: e.target.value }))} style={{ ...baseInput, fontSize: 13, padding: "9px 12px", width: 130, cursor: "pointer" }}>
                       <option value="monthly">Monthly</option>
                       <option value="quarterly">Quarterly</option>
-                      <option value="halfYearly">Half-Yearly</option>
+                      <option value="halfYearly">Bi-Annual</option>
                       <option value="yearly">Yearly</option>
                       <option value="one-time">One-Time</option>
                       <option value="custom">Custom</option>
