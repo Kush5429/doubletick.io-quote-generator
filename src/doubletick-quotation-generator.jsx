@@ -274,7 +274,7 @@ const ADDON_CATALOG = [
     label: "Shopify Integration",
     desc: "Connect your Shopify store to send order updates and support via WhatsApp.",
     plans: ["pro", "enterprise", "standard"],
-    monthly: 0, quarterly: 0, halfYearly: 0, yearly: 0,
+    monthly: 1000, quarterly: 3000, halfYearly: 6000, yearly: 12000,
     perUnit: false,
   },
   {
@@ -2419,13 +2419,27 @@ Rules: No preamble. No closing line. Start directly with "${pair[0]}:". Each fie
           {step === 1 && (
             <>
               <StepHead title="Client Information" sub="Enter the recipient's details for this quotation." />
+              {/* Welcome banner */}
+              <div style={{ margin: "0 0 20px", padding: "20px 24px", background: "linear-gradient(135deg, rgba(23,160,102,0.08) 0%, rgba(13,21,32,0) 70%)", border: `1px solid rgba(23,160,102,0.15)`, borderRadius: 14, display: "flex", alignItems: "center", gap: 18 }}>
+                <div style={{ width: 44, height: 44, borderRadius: 12, background: "rgba(23,160,102,0.12)", border: "1px solid rgba(23,160,102,0.2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M11 2L3 6v5c0 4.4 3.4 8.5 8 9.5 4.6-1 8-5.1 8-9.5V6L11 2z" stroke="#21c47a" strokeWidth="1.5" strokeLinejoin="round"/><path d="M8 11l2 2 4-4" stroke="#21c47a" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                </div>
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: T.text, marginBottom: 3 }}>New Quotation</div>
+                  <div style={{ fontSize: 12, color: T.textMuted, lineHeight: 1.5 }}>Fill in the client details below, or load a saved template to get started quickly.</div>
+                </div>
+                <div style={{ marginLeft: "auto", textAlign: "right", flexShrink: 0 }}>
+                  <div style={{ fontSize: 10, color: T.textMuted, textTransform: "uppercase", letterSpacing: 1, marginBottom: 2 }}>Quote ID</div>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: T.greenLt, fontFamily: "monospace" }}>{qid}</div>
+                </div>
+              </div>
 
               {/* Templates panel */}
               <div style={{ marginBottom: 18 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: showTemplates ? 12 : 0 }}>
-                  <button onClick={() => setShowTemplates(p => !p)} style={{ display: "flex", alignItems: "center", gap: 7, padding: "7px 14px", background: showTemplates ? "rgba(23,160,102,0.1)" : "rgba(23,160,102,0.06)", border: `1.5px solid ${showTemplates ? T.green : T.borderMed}`, borderRadius: 8, color: T.greenLt, cursor: "pointer", fontSize: 12.5, fontWeight: 600 }}>
+                  <button onClick={() => setShowTemplates(p => !p)} style={{ display: "flex", alignItems: "center", gap: 7, padding: "8px 16px", background: showTemplates ? "rgba(23,160,102,0.1)" : "rgba(23,160,102,0.05)", border: `1.5px solid ${showTemplates ? T.green : T.borderMed}`, borderRadius: 9, color: T.greenLt, cursor: "pointer", fontSize: 12.5, fontWeight: 600 }}>
                     <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style={{ flexShrink: 0 }}><rect x="1" y="1" width="12" height="12" rx="2" stroke="#21c47a" strokeWidth="1.3"/><path d="M4 5h6M4 7.5h6M4 10h4" stroke="#21c47a" strokeWidth="1.3" strokeLinecap="round"/></svg>
-                    Saved Templates
+                    {templates.length > 0 ? "Load Saved Template" : "Saved Templates"}
                     {templates.length > 0 && <span style={{ background: T.green, color: "#fff", borderRadius: 10, fontSize: 10, padding: "1px 6px", fontWeight: 700 }}>{templates.length}</span>}
                     <span style={{ fontSize: 10, color: T.textMuted, marginLeft: 2 }}>{showTemplates ? "▲" : "▼"}</span>
                   </button>
@@ -2486,6 +2500,7 @@ Rules: No preamble. No closing line. Start directly with "${pair[0]}:". Each fie
               </div>
 
               <PanelCard>
+                <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.6px", color: "#64748b", textTransform: "uppercase", marginBottom: 18 }}>Client Details</div>
                 <div style={{ display: "grid", gap: 20 }}>
                   <FField label="Client's Full Name *"><input value={clientName} onChange={e => setClientName(e.target.value)} placeholder="e.g. Anurag Sharma" style={baseInput} /></FField>
                   <FField label="Company Name *">
@@ -2587,8 +2602,19 @@ Rules: No preamble. No closing line. Start directly with "${pair[0]}:". Each fie
                                   <span style={{ fontSize: 14, fontWeight: 700, color: T.white }}>₹</span>
                                   <input value={enterpriseCustomPrice} onChange={e => setEnterpriseCustomPrice(e.target.value)} onClick={e => e.stopPropagation()} placeholder="45,000" style={{ width: "100%", padding: "6px 8px", background: "#0d1520", border: `1.5px solid ${T.green}`, borderRadius: 7, color: T.white, fontSize: 14, fontWeight: 700, outline: "none", fontFamily: "inherit" }} />
                                 </div>
-                                {enterpriseCustomPrice && <div style={{ fontSize: 10, color: "#64748b", marginTop: 4 }}>/{billingShort} · +GST ₹{fmtINR(Math.round((parseInt(enterpriseCustomPrice.replace(/[^0-9]/g,""),10)||0)*1.18))} total</div>}
-                                <div style={{ fontSize: 10, color: enterpriseAIBots ? T.greenLt : "#475569", marginTop: 3 }}>{enterpriseAIBots ? `+₹${billing==="yearly"?"1,80,000":billing==="quarterly"?"45,000":"15,000"} AI Bots` : "without AI Bots"}</div>
+                                {enterpriseCustomPrice && (() => {
+                                  const raw = parseInt(enterpriseCustomPrice.replace(/[^0-9]/g,""),10) || 0;
+                                  return raw > 0 ? (
+                                    <div style={{ marginTop: 10, padding: "8px 10px", background: "rgba(23,160,102,0.06)", borderRadius: 8, border: "1px solid rgba(23,160,102,0.15)" }}>
+                                      <div style={{ fontSize: 20, fontWeight: 800, color: T.greenLt, letterSpacing: "-0.5px", lineHeight: 1.1 }}>
+                                        ₹{fmtINR(raw)}
+                                        <span style={{ fontSize: 11, fontWeight: 400, color: "#64748b", marginLeft: 4 }}>/{billingShort}</span>
+                                      </div>
+                                      <div style={{ fontSize: 10.5, color: "#64748b", marginTop: 3 }}>+GST · ₹{fmtINR(Math.round(raw * 1.18))} total</div>
+                                    </div>
+                                  ) : null;
+                                })()}
+                                <div style={{ fontSize: 10, color: enterpriseAIBots ? T.greenLt : "#475569", marginTop: 4 }}>{enterpriseAIBots ? `+₹${billing==="yearly"?"1,80,000":billing==="quarterly"?"45,000":"15,000"} AI Bots` : "without AI Bots"}</div>
                               </div>
                             ) : (
                               <div>
@@ -2989,30 +3015,33 @@ Rules: No preamble. No closing line. Start directly with "${pair[0]}:". Each fie
                 </div>
 
                 {/* ── ROI PAGE TOGGLE ── */}
-                <div style={{ marginTop: 14, padding: "14px 16px", background: T.surfaceHigh, borderRadius: 10, border: `1px solid ${includeROI ? T.green : T.border}`, transition: "border-color 0.2s" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <div>
-                      <div style={{ fontSize: 13.5, fontWeight: 600, color: T.text }}>Include ROI Calculator Page</div>
-                      <div style={{ fontSize: 11.5, color: T.textMuted, marginTop: 2 }}>AI-generated page estimating cost savings, leads captured, and business impact</div>
+                <div style={{ marginTop: 14, borderRadius: 12, border: `1.5px solid ${includeROI ? T.green : T.border}`, overflow: "hidden", transition: "border-color 0.2s" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 16px", background: includeROI ? "rgba(23,160,102,0.06)" : T.surfaceHigh }}>
+                    <div style={{ width: 36, height: 36, borderRadius: 9, background: includeROI ? "rgba(23,160,102,0.15)" : "rgba(255,255,255,0.04)", border: `1px solid ${includeROI ? "rgba(23,160,102,0.3)" : T.border}`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, transition: "all 0.2s" }}>
+                      <svg width="17" height="17" viewBox="0 0 17 17" fill="none"><rect x="2" y="11" width="3" height="4" rx="1" stroke={includeROI ? "#21c47a" : "#475569"} strokeWidth="1.3"/><rect x="7" y="7" width="3" height="8" rx="1" stroke={includeROI ? "#21c47a" : "#475569"} strokeWidth="1.3"/><rect x="12" y="3" width="3" height="12" rx="1" stroke={includeROI ? "#21c47a" : "#475569"} strokeWidth="1.3"/><path d="M2 8.5l4-3 4 2 5-5" stroke={includeROI ? "#21c47a" : "#475569"} strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/></svg>
                     </div>
-                    <div style={{ display: "flex", gap: 8, flexShrink: 0, marginLeft: 16 }}>
-                      <button onClick={() => setIncludeROI(false)} style={{ padding: "6px 14px", borderRadius: 6, border: `1.5px solid ${!includeROI ? T.green : T.border}`, background: !includeROI ? "rgba(23,160,102,0.1)" : "transparent", color: !includeROI ? T.greenLt : T.textSub, cursor: "pointer", fontSize: 12.5, fontWeight: 600 }}>No</button>
-                      <button onClick={() => { setIncludeROI(true); if (!roiText) handleGenerateROI(); }} style={{ padding: "6px 14px", borderRadius: 6, border: `1.5px solid ${includeROI ? T.green : T.border}`, background: includeROI ? "rgba(23,160,102,0.1)" : "transparent", color: includeROI ? T.greenLt : T.textSub, cursor: "pointer", fontSize: 12.5, fontWeight: 600 }}>Yes</button>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: 13.5, fontWeight: 600, color: T.text }}>Include ROI Calculator Page</div>
+                      <div style={{ fontSize: 11.5, color: T.textMuted, marginTop: 2, lineHeight: 1.4 }}>AI-generated page estimating cost savings, leads captured, and business impact</div>
+                    </div>
+                    <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
+                      <button onClick={() => setIncludeROI(false)} style={{ padding: "6px 14px", borderRadius: 7, border: `1.5px solid ${!includeROI ? T.green : T.border}`, background: !includeROI ? "rgba(23,160,102,0.12)" : "transparent", color: !includeROI ? T.greenLt : T.textSub, cursor: "pointer", fontSize: 12.5, fontWeight: 600, transition: "all 0.15s" }}>No</button>
+                      <button onClick={() => { setIncludeROI(true); if (!roiText) handleGenerateROI(); }} style={{ padding: "6px 14px", borderRadius: 7, border: `1.5px solid ${includeROI ? T.green : T.border}`, background: includeROI ? "rgba(23,160,102,0.12)" : "transparent", color: includeROI ? T.greenLt : T.textSub, cursor: "pointer", fontSize: 12.5, fontWeight: 600, transition: "all 0.15s" }}>Yes</button>
                     </div>
                   </div>
                   {includeROI && (
-                    <div style={{ marginTop: 12, paddingTop: 12, borderTop: `1px solid ${T.border}` }}>
+                    <div style={{ padding: "14px 16px", borderTop: `1px solid ${T.border}`, background: "#0a1219" }}>
                       {roiLoading ? (
-                        <div style={{ display: "flex", alignItems: "center", gap: 10, color: T.textMuted, fontSize: 13 }}>
-                          <span style={{ display: "inline-block", width: 14, height: 14, border: "2px solid rgba(255,255,255,0.2)", borderTopColor: T.greenLt, borderRadius: "50%", animation: "spin 0.7s linear infinite" }} />
+                        <div style={{ display: "flex", alignItems: "center", gap: 10, color: T.textMuted, fontSize: 13, padding: "8px 0" }}>
+                          <span style={{ display: "inline-block", width: 14, height: 14, border: "2px solid rgba(255,255,255,0.2)", borderTopColor: T.greenLt, borderRadius: "50%", animation: "spin 0.7s linear infinite", flexShrink: 0 }} />
                           Generating ROI analysis…
                         </div>
                       ) : roiError ? (
-                        <div style={{ fontSize: 12, color: "#f87171" }}>{roiError}</div>
+                        <div style={{ fontSize: 12, color: "#f87171", padding: "6px 0" }}>{roiError}</div>
                       ) : roiText ? (
                         <div>
-                          <textarea value={roiText} onChange={e => setRoiText(e.target.value)} rows={6} style={{ ...baseInput, fontSize: 12.5, lineHeight: 1.65, resize: "vertical" }} />
-                          <button onClick={handleGenerateROI} style={{ marginTop: 6, fontSize: 11.5, color: T.greenLt, background: "none", border: "none", cursor: "pointer", padding: 0, textDecoration: "underline" }}>↺ Regenerate</button>
+                          <textarea value={roiText} onChange={e => setRoiText(e.target.value)} rows={6} style={{ ...baseInput, fontSize: 12.5, lineHeight: 1.7, resize: "vertical", background: "#0d1520" }} />
+                          <button onClick={handleGenerateROI} style={{ marginTop: 8, fontSize: 11.5, color: T.greenLt, background: "rgba(23,160,102,0.06)", border: `1px solid rgba(23,160,102,0.2)`, cursor: "pointer", padding: "5px 12px", borderRadius: 6, fontWeight: 600, display: "flex", alignItems: "center", gap: 5 }}>↺ Regenerate</button>
                         </div>
                       ) : null}
                     </div>
@@ -3064,28 +3093,31 @@ ${emailDraft.body}`)} style={{ marginLeft: "auto", fontSize: 11, color: T.greenL
                 </div>
 
                 {/* ── CASE STUDY TOGGLE ── */}
-                <div style={{ marginTop: 14, padding: "14px 16px", background: T.surfaceHigh, borderRadius: 10, border: `1px solid ${includeCaseStudy ? T.green : T.border}`, transition: "border-color 0.2s" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <div>
-                      <div style={{ fontSize: 13.5, fontWeight: 600, color: T.text }}>Include Client Case Studies</div>
-                      <div style={{ fontSize: 11.5, color: T.textMuted, marginTop: 2 }}>AI picks 2 relevant stories from DoubleTick's real client base based on your scope</div>
+                <div style={{ marginTop: 14, borderRadius: 12, border: `1.5px solid ${includeCaseStudy ? T.green : T.border}`, overflow: "hidden", transition: "border-color 0.2s" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 16px", background: includeCaseStudy ? "rgba(23,160,102,0.06)" : T.surfaceHigh }}>
+                    <div style={{ width: 36, height: 36, borderRadius: 9, background: includeCaseStudy ? "rgba(23,160,102,0.15)" : "rgba(255,255,255,0.04)", border: `1px solid ${includeCaseStudy ? "rgba(23,160,102,0.3)" : T.border}`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, transition: "all 0.2s" }}>
+                      <svg width="17" height="17" viewBox="0 0 17 17" fill="none"><rect x="2" y="2" width="13" height="13" rx="2.5" stroke={includeCaseStudy ? "#21c47a" : "#475569"} strokeWidth="1.3"/><path d="M5 6h7M5 8.5h7M5 11h4.5" stroke={includeCaseStudy ? "#21c47a" : "#475569"} strokeWidth="1.3" strokeLinecap="round"/></svg>
                     </div>
-                    <div style={{ display: "flex", gap: 8, flexShrink: 0, marginLeft: 16 }}>
-                      <button onClick={() => setIncludeCaseStudy(false)} style={{ padding: "6px 14px", borderRadius: 6, border: `1.5px solid ${!includeCaseStudy ? T.green : T.border}`, background: !includeCaseStudy ? "rgba(23,160,102,0.1)" : "transparent", color: !includeCaseStudy ? T.greenLt : T.textSub, cursor: "pointer", fontSize: 12.5, fontWeight: 600 }}>No</button>
-                      <button onClick={() => { setIncludeCaseStudy(true); if (!caseStudyText) handleGenerateCaseStudy(); }} style={{ padding: "6px 14px", borderRadius: 6, border: `1.5px solid ${includeCaseStudy ? T.green : T.border}`, background: includeCaseStudy ? "rgba(23,160,102,0.1)" : "transparent", color: includeCaseStudy ? T.greenLt : T.textSub, cursor: "pointer", fontSize: 12.5, fontWeight: 600 }}>Yes</button>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: 13.5, fontWeight: 600, color: T.text }}>Include Client Case Studies</div>
+                      <div style={{ fontSize: 11.5, color: T.textMuted, marginTop: 2, lineHeight: 1.4 }}>AI picks 2 relevant stories from DoubleTick's real client base based on your scope</div>
+                    </div>
+                    <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
+                      <button onClick={() => setIncludeCaseStudy(false)} style={{ padding: "6px 14px", borderRadius: 7, border: `1.5px solid ${!includeCaseStudy ? T.green : T.border}`, background: !includeCaseStudy ? "rgba(23,160,102,0.12)" : "transparent", color: !includeCaseStudy ? T.greenLt : T.textSub, cursor: "pointer", fontSize: 12.5, fontWeight: 600, transition: "all 0.15s" }}>No</button>
+                      <button onClick={() => { setIncludeCaseStudy(true); if (!caseStudyText) handleGenerateCaseStudy(); }} style={{ padding: "6px 14px", borderRadius: 7, border: `1.5px solid ${includeCaseStudy ? T.green : T.border}`, background: includeCaseStudy ? "rgba(23,160,102,0.12)" : "transparent", color: includeCaseStudy ? T.greenLt : T.textSub, cursor: "pointer", fontSize: 12.5, fontWeight: 600, transition: "all 0.15s" }}>Yes</button>
                     </div>
                   </div>
                   {includeCaseStudy && (
-                    <div style={{ marginTop: 12, paddingTop: 12, borderTop: `1px solid ${T.border}` }}>
+                    <div style={{ padding: "14px 16px", borderTop: `1px solid ${T.border}`, background: "#0a1219" }}>
                       {caseStudyLoading ? (
-                        <div style={{ display: "flex", alignItems: "center", gap: 10, color: T.textMuted, fontSize: 13 }}>
-                          <span style={{ display: "inline-block", width: 14, height: 14, border: "2px solid rgba(255,255,255,0.2)", borderTopColor: T.greenLt, borderRadius: "50%", animation: "spin 0.7s linear infinite" }} />
+                        <div style={{ display: "flex", alignItems: "center", gap: 10, color: T.textMuted, fontSize: 13, padding: "8px 0" }}>
+                          <span style={{ display: "inline-block", width: 14, height: 14, border: "2px solid rgba(255,255,255,0.2)", borderTopColor: T.greenLt, borderRadius: "50%", animation: "spin 0.7s linear infinite", flexShrink: 0 }} />
                           Selecting relevant case studies…
                         </div>
                       ) : caseStudyText ? (
                         <div>
-                          <textarea value={caseStudyText} onChange={e => setCaseStudyText(e.target.value)} rows={7} style={{ ...baseInput, fontSize: 12.5, lineHeight: 1.65, resize: "vertical" }} />
-                          <button onClick={handleGenerateCaseStudy} style={{ marginTop: 6, fontSize: 11.5, color: T.greenLt, background: "none", border: "none", cursor: "pointer", padding: 0, textDecoration: "underline" }}>↺ Regenerate</button>
+                          <textarea value={caseStudyText} onChange={e => setCaseStudyText(e.target.value)} rows={7} style={{ ...baseInput, fontSize: 12.5, lineHeight: 1.7, resize: "vertical", background: "#0d1520" }} />
+                          <button onClick={handleGenerateCaseStudy} style={{ marginTop: 8, fontSize: 11.5, color: T.greenLt, background: "rgba(23,160,102,0.06)", border: `1px solid rgba(23,160,102,0.2)`, cursor: "pointer", padding: "5px 12px", borderRadius: 6, fontWeight: 600, display: "flex", alignItems: "center", gap: 5 }}>↺ Regenerate</button>
                         </div>
                       ) : null}
                     </div>
