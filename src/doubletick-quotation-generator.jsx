@@ -1467,7 +1467,7 @@ Rules: No preamble. No closing line. Start directly with "${pair[0]}:". Each fie
     <div ref={docRef} style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: "#1e2d3d", background: "#fff", maxWidth: 860, margin: "0 auto" }}>
 
       {/* PAGE 1 */}
-      <div style={{ breakAfter: "page" }}>
+      <div>
         <div style={{ background: theme.headerBg, padding: "38px 56px 30px" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
             <div>
@@ -1531,7 +1531,7 @@ Rules: No preamble. No closing line. Start directly with "${pair[0]}:". Each fie
       </div>
 
       {/* PAGE 2 */}
-      <div style={{ breakBefore: "page" }}>
+      <div style={{ breakBefore: "page", breakAfter: "page" }}>
         <PrintPageHeader title="Commercial Proposal" sub={`${companyName}  ·  ${effectiveBillingLabel} Billing`} clientLogo={clientLogo} companyName={companyName} theme={theme} />
         <div style={{ padding: "24px 56px" }}>
           {/* ── Plan pricing ── */}
@@ -1702,20 +1702,19 @@ Rules: No preamble. No closing line. Start directly with "${pair[0]}:". Each fie
         </div>
       </div>
 
-      {/* PAGE 3 — SCOPE OF WORK */}
-      <div style={{ breakBefore: "page" }}>
-        <PrintPageHeader title="Support & Onboarding" sub="Scope of Work" clientLogo={clientLogo} companyName={companyName} theme={theme} />
-        <div style={{ padding: "24px 56px" }}>
-          {scope && (
+      {/* PAGE 3 — SCOPE OF WORK — only if scope content exists */}
+      {scope && scope.trim() && (
+        <div style={{ breakBefore: "page" }}>
+          <PrintPageHeader title="Support & Onboarding" sub="Scope of Work" clientLogo={clientLogo} companyName={companyName} theme={theme} />
+          <div style={{ padding: "24px 56px" }}>
             <div style={{ marginBottom: 22 }}>
-              <div style={{ marginBottom: 10 }} />
               <div style={{ marginTop: 4 }}>
                 {renderScopeLines(scope, theme)}
               </div>
             </div>
-          )}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* PAGE ROI — optional */}
       {includeROI && roiText && (
@@ -1882,15 +1881,15 @@ Rules: No preamble. No closing line. Start directly with "${pair[0]}:". Each fie
               <tbody>
                 {[
                   ["Payment Terms", "Full payment is due upfront, prior to account activation."],
-                  ["Taxation", "Goods and Services Tax (GST) at 18% is applicable in addition to all listed prices."],
-                  ["Purchase Order", `Upon acceptance of this proposal, ${teamName} shall issue a Purchase Order (PO) to formalise the commercial agreement.`],
-                  ["Advance Payment", `${teamName} agrees to remit payment in advance in accordance with the agreed commercial terms and conditions.`],
-                  ["Billing Cycle", `${effectiveBillingLabel} — This proposal is structured on a ${effectiveBillingLabel.toLowerCase()} billing basis${effectiveBillingLabel === "Monthly" ? " (subject to management approval)" : ""}. Renewal terms shall be mutually agreed upon prior to the next cycle.`],
+                  ["Taxation", "GST at 18% is applicable in addition to all listed prices."],
+                  ["Purchase Order", `Upon acceptance, ${teamName} shall issue a Purchase Order (PO) to formalise the commercial agreement.`],
+                  ["Advance Payment", `${teamName} agrees to remit payment in advance per agreed commercial terms.`],
+                  ["Billing Cycle", `${effectiveBillingLabel}${effectiveBillingLabel === "Monthly" ? " (subject to management approval)" : ""}. Renewal terms shall be mutually agreed upon prior to the next cycle.`],
                   ["Refund Policy", "Please refer to our refund and cancellation policy at: https://doubletick.io/refund-and-cancellations"],
                 ].map(([label, val], i) => (
                   <tr key={label} style={{ background: i % 2 === 0 ? "#f9fafb" : "#fff", borderBottom: "1px solid #e5e7eb" }}>
-                    <td style={{ padding: "11px 16px", fontWeight: 600, color: "#111827", width: 190, verticalAlign: "top", fontSize: 12.5 }}>{label}</td>
-                    <td style={{ padding: "11px 16px", color: "#374151", lineHeight: 1.75, fontSize: 12.5 }}>
+                    <td style={{ padding: "8px 14px", fontWeight: 600, color: "#111827", width: 175, verticalAlign: "top", fontSize: 12 }}>{label}</td>
+                    <td style={{ padding: "8px 14px", color: "#374151", lineHeight: 1.6, fontSize: 12 }}>
                       {label === "Refund Policy" ? (
                         <>Please refer to our refund and cancellation policy at: <a href="https://doubletick.io/refund-and-cancellations" style={{ color: theme.accent, textDecoration: "underline" }}>doubletick.io/refund-and-cancellations</a></>
                       ) : val}
@@ -1901,12 +1900,12 @@ Rules: No preamble. No closing line. Start directly with "${pair[0]}:". Each fie
             </table>
           </PrintSection>
           <PrintSection title="WhatsApp API Message Costs" theme={theme}>
-            <p style={{ color: "#374151", lineHeight: 1.9, marginBottom: 14, fontSize: 13 }}>WhatsApp message costs are charged separately by Meta and are effective as of <strong>January 1, 2026</strong>. These are prepaid — the client must recharge the DoubleTick Wallet directly. Rates are subject to change per Meta's pricing policy. No setup fees are applicable.</p>
+            <p style={{ color: "#374151", lineHeight: 1.7, marginBottom: 10, fontSize: 12 }}>WhatsApp message costs are charged separately by Meta effective <strong>January 1, 2026</strong>. These are prepaid — the client recharges the DoubleTick Wallet directly. Rates are subject to change per Meta's pricing policy. No setup fees apply.</p>
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
                 <tr style={{ background: theme.headerSolid, color: "#fff" }}>
-                  <th style={{ padding: "10px 16px", textAlign: "left", fontWeight: 600, fontSize: 12 }}>Message Type</th>
-                  <th style={{ padding: "10px 16px", textAlign: "right", fontWeight: 600, fontSize: 12 }}>Rate (per delivered message)</th>
+                  <th style={{ padding: "8px 14px", textAlign: "left", fontWeight: 600, fontSize: 11.5 }}>Message Type</th>
+                  <th style={{ padding: "8px 14px", textAlign: "right", fontWeight: 600, fontSize: 11.5 }}>Rate (per delivered message)</th>
                 </tr>
               </thead>
               <tbody>
@@ -1920,20 +1919,20 @@ Rules: No preamble. No closing line. Start directly with "${pair[0]}:". Each fie
                   ["WhatsApp API Calling — Outbound", "INR 0.52620/min", false, null],
                 ].map(([type, rate, free, note], i) => (
                   <tr key={type} style={{ background: i % 2 === 0 ? "#fff" : "#f7faf9", borderBottom: "1px solid #e5e7eb" }}>
-                    <td style={{ padding: "10px 16px", color: "#374151", fontSize: 12.5 }}>
+                    <td style={{ padding: "7px 14px", color: "#374151", fontSize: 12 }}>
                       {type}
-                      {note && <div style={{ fontSize: 11, color: "#6b7280", marginTop: 2, fontStyle: "italic" }}>{note}</div>}
+                      {note && <div style={{ fontSize: 10.5, color: "#6b7280", marginTop: 1, fontStyle: "italic" }}>{note}</div>}
                     </td>
-                    <td style={{ padding: "10px 16px", textAlign: "right", fontWeight: 600, color: free ? "#0b5235" : "#111827", fontSize: 12.5 }}>{rate}</td>
+                    <td style={{ padding: "7px 14px", textAlign: "right", fontWeight: 600, color: free ? "#0b5235" : "#111827", fontSize: 12 }}>{rate}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
             <div style={{ marginTop: 10, fontSize: 11.5, color: "#6b7280" }}>For rates outside India: <span style={{ color: "#1aad74" }}>https://doubletick.io/conversation-cost</span></div>
           </PrintSection>
-          <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 28 }}>
-            <div style={{ textAlign: "center", minWidth: 260 }}>
-              <img src={SHIVAM_SIG} alt="Authorised Signatory" style={{ width: 220, objectFit: "contain", display: "block", margin: "0 auto" }} />
+          <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 20, breakInside: "avoid", breakBefore: "avoid" }}>
+            <div style={{ textAlign: "center", minWidth: 220 }}>
+              <img src={SHIVAM_SIG} alt="Authorised Signatory" style={{ width: 180, objectFit: "contain", display: "block", margin: "0 auto" }} />
             </div>
           </div>
         </div>
