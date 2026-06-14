@@ -1066,7 +1066,7 @@ export default function App() {
   const [addons, setAddons] = useState([]);
   const [iframeSelections, setIframeSelections] = useState({});
   const [customAddonsList, setCustomAddonsList] = useState([]);
-  const [newCustomAddon, setNewCustomAddon] = useState({ label: "", price: "", billing: "custom" });
+  const [newCustomAddon, setNewCustomAddon] = useState({ label: "", desc: "", price: "", billing: "custom" });
   const [scope, setScope] = useState("");
   const [discount, setDiscount] = useState(0);
   const [preview, setPreview] = useState(false);
@@ -1531,7 +1531,7 @@ Rules: No preamble. No closing line. Start directly with "${pair[0]}:". Each fie
       </div>
 
       {/* PAGE 2 */}
-      <div style={{ breakBefore: "page", breakAfter: "page" }}>
+      <div style={{ breakBefore: "page" }}>
         <PrintPageHeader title="Commercial Proposal" sub={`${companyName}  ·  ${effectiveBillingLabel} Billing`} clientLogo={clientLogo} companyName={companyName} theme={theme} />
         <div style={{ padding: "24px 56px" }}>
           {/* ── Plan pricing ── */}
@@ -1637,6 +1637,7 @@ Rules: No preamble. No closing line. Start directly with "${pair[0]}:". Each fie
                     <td style={{ ...pTdc, padding: "13px 16px", color: "#9ca3af", fontSize: 12 }}>{numericAddons.length + customAddons.length + i + 2}</td>
                     <td style={{ ...pTdl, padding: "13px 18px" }}>
                       <div style={{ fontWeight: 600, color: "#374151", fontSize: 13 }}>{ca.label}</div>
+                      {ca.desc && <div style={{ fontSize: 11.5, color: "#6b7280", marginTop: 3, lineHeight: 1.5, fontStyle: "italic" }}>{ca.desc}</div>}
                     </td>
                     <td style={{ ...pTdr, padding: "13px 18px" }}>
                       <div style={{ fontSize: 13.5, fontWeight: 700, color: theme.accent, fontStyle: "italic" }}>{ca.price ? `INR ${Number(ca.price).toLocaleString("en-IN")}/-` : "—"}</div>
@@ -1664,10 +1665,11 @@ Rules: No preamble. No closing line. Start directly with "${pair[0]}:". Each fie
           </PrintSection>
 
           {/* Features — dynamic for enterprise */}
-          <PrintSection title={`DoubleTick ${planData.name} Plan — Included Features`} theme={theme}>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px 30px", marginBottom: 14 }}>
+          <div style={{ marginBottom: 20 }}>
+            <div style={{ fontFamily: "'EB Garamond', serif", fontSize: 16.5, fontWeight: 600, color: theme.sectionTitle, paddingBottom: 7, borderBottom: `1.5px solid ${theme.sectionBorder}`, marginBottom: 14 }}>{`DoubleTick ${planData.name} Plan — Included Features`}</div>
+            <div style={{ columns: 2, columnGap: 30, marginBottom: 14 }}>
               {enterpriseFeatures.map((f, i) => (
-                <div key={i} style={{ display: "flex", gap: 9, alignItems: "flex-start", fontSize: 12.5, color: "#374151", lineHeight: 1.65 }}>
+                <div key={i} style={{ display: "flex", gap: 9, alignItems: "flex-start", fontSize: 12.5, color: "#374151", lineHeight: 1.65, breakInside: "avoid", marginBottom: 2 }}>
                   <span style={{ color: theme.accent, flexShrink: 0, marginTop: 3, fontSize: 10 }}>▶</span>
                   <span>{f}</span>
                 </div>
@@ -1682,7 +1684,7 @@ Rules: No preamble. No closing line. Start directly with "${pair[0]}:". Each fie
               )}
               {" "}Features not listed here are not part of the base plan and may be available as separate add-ons.
             </div>
-          </PrintSection>
+          </div>
 
           <div style={{ padding: "16px 20px", background: "#fffbeb", borderRadius: 9, border: "1px solid #fcd34d", fontSize: 12.5 }}>
             <div style={{ fontWeight: 700, color: "#78350f", marginBottom: 10, fontSize: 12, letterSpacing: 0.5, textTransform: "uppercase" }}>Important Notes</div>
@@ -2856,25 +2858,31 @@ Rules: No preamble. No closing line. Start directly with "${pair[0]}:". Each fie
                     <div style={{ fontSize: 9.5, color: "#4a6070", textTransform: "uppercase", letterSpacing: 2.5, fontWeight: 700 }}>Custom Add-on</div>
                     <div style={{ flex: 1, height: 1, background: "linear-gradient(to right, #1c2836, transparent)" }} />
                   </div>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr auto auto auto", gap: 8, alignItems: "center" }}>
-                    <input value={newCustomAddon.label} onChange={e => setNewCustomAddon(p => ({ ...p, label: e.target.value }))} placeholder="Add-on name / description" style={{ ...baseInput, fontSize: 13, padding: "9px 12px" }} />
-                    <input value={newCustomAddon.price} onChange={e => setNewCustomAddon(p => ({ ...p, price: e.target.value }))} placeholder="Price" style={{ ...baseInput, fontSize: 13, padding: "9px 12px", width: 110 }} />
-                    <select value={newCustomAddon.billing} onChange={e => setNewCustomAddon(p => ({ ...p, billing: e.target.value }))} style={{ ...baseInput, fontSize: 13, padding: "9px 12px", width: 130, cursor: "pointer" }}>
-                      <option value="monthly">Monthly</option>
-                      <option value="quarterly">Quarterly</option>
-                      <option value="halfYearly">Bi-Annual</option>
-                      <option value="yearly">Yearly</option>
-                      <option value="one-time">One-Time</option>
-                      <option value="custom">Custom</option>
-                    </select>
-                    <button onClick={() => { if (!newCustomAddon.label.trim()) return; setCustomAddonsList(p => [...p, { ...newCustomAddon, id: `custom_${Date.now()}` }]); setNewCustomAddon({ label: "", price: "", billing: "custom" }); }} style={{ background: T.green, border: "none", borderRadius: 8, color: "#fff", fontWeight: 700, fontSize: 13, padding: "9px 16px", cursor: "pointer", whiteSpace: "nowrap" }}>+ Add</button>
+                  <div style={{ display: "grid", gap: 8 }}>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr auto auto auto", gap: 8, alignItems: "center" }}>
+                      <input value={newCustomAddon.label} onChange={e => setNewCustomAddon(p => ({ ...p, label: e.target.value }))} placeholder="Add-on name *" style={{ ...baseInput, fontSize: 13, padding: "9px 12px" }} />
+                      <input value={newCustomAddon.price} onChange={e => setNewCustomAddon(p => ({ ...p, price: e.target.value }))} placeholder="Price" style={{ ...baseInput, fontSize: 13, padding: "9px 12px", width: 110 }} />
+                      <select value={newCustomAddon.billing} onChange={e => setNewCustomAddon(p => ({ ...p, billing: e.target.value }))} style={{ ...baseInput, fontSize: 13, padding: "9px 12px", width: 130, cursor: "pointer" }}>
+                        <option value="monthly">Monthly</option>
+                        <option value="quarterly">Quarterly</option>
+                        <option value="halfYearly">Bi-Annual</option>
+                        <option value="yearly">Yearly</option>
+                        <option value="one-time">One-Time</option>
+                        <option value="custom">Custom</option>
+                      </select>
+                      <button onClick={() => { if (!newCustomAddon.label.trim()) return; setCustomAddonsList(p => [...p, { ...newCustomAddon, id: `custom_${Date.now()}` }]); setNewCustomAddon({ label: "", desc: "", price: "", billing: "custom" }); }} style={{ background: T.green, border: "none", borderRadius: 8, color: "#fff", fontWeight: 700, fontSize: 13, padding: "9px 16px", cursor: "pointer", whiteSpace: "nowrap" }}>+ Add</button>
+                    </div>
+                    <input value={newCustomAddon.desc} onChange={e => setNewCustomAddon(p => ({ ...p, desc: e.target.value }))} placeholder="Description (optional) — shown on the quote" style={{ ...baseInput, fontSize: 12.5, padding: "8px 12px" }} />
                   </div>
                   {customAddonsList.length > 0 && (
                     <div style={{ marginTop: 10, display: "grid", gap: 6 }}>
                       {customAddonsList.map(ca => (
-                        <div key={ca.id} style={{ padding: "9px 14px", borderRadius: 8, border: `1.5px solid ${T.green}`, background: "rgba(23,160,102,0.05)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                          <div style={{ fontSize: 13, color: T.text }}>{ca.label}</div>
-                          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                        <div key={ca.id} style={{ padding: "10px 14px", borderRadius: 8, border: `1.5px solid ${T.green}`, background: "rgba(23,160,102,0.05)", display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 10 }}>
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ fontSize: 13, color: T.text, fontWeight: 600 }}>{ca.label}</div>
+                            {ca.desc && <div style={{ fontSize: 11.5, color: T.textMuted, marginTop: 3, lineHeight: 1.4 }}>{ca.desc}</div>}
+                          </div>
+                          <div style={{ display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }}>
                             <span style={{ fontSize: 12, color: T.greenLt, fontWeight: 600 }}>{ca.price ? `₹${Number(ca.price).toLocaleString("en-IN")}` : "—"} · {ca.billing}</span>
                             <button onClick={() => setCustomAddonsList(p => p.filter(x => x.id !== ca.id))} style={{ background: "none", border: "none", color: "#f87171", cursor: "pointer", fontSize: 13, padding: 0 }}>✕</button>
                           </div>
