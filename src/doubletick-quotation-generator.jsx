@@ -1177,6 +1177,17 @@ export default function App() {
   const [quoteLog, setQuoteLog] = useState(loadQuoteLog);
   const [showQuoteLog, setShowQuoteLog] = useState(false);
   const [appPage, setAppPage] = useState("builder"); // "builder" | "dashboard"
+
+  // ── Responsive breakpoints ─────────────────────────────────────────────────
+  const [windowWidth, setWindowWidth] = useState(typeof window !== "undefined" ? window.innerWidth : 1280);
+  useEffect(() => {
+    const onResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+  const isMobile  = windowWidth < 768;   // single-column, no preview panel
+  const isTablet  = windowWidth < 1100;  // narrow preview panel
+  const isNarrow  = windowWidth < 900;   // stack scope+preview grid
   const [logFilter, setLogFilter] = useState("all"); // "all" | "pending" | "won" | "lost"
   const [lostReasonInput, setLostReasonInput] = useState({});
   const [confirmDelete, setConfirmDelete] = useState(null); // qid to confirm
@@ -1460,7 +1471,8 @@ Thank you for considering DoubleTick! 🙏`;
       { name: "ASK Wealth", industry: "Wealth Management", useCase: "relationship manager communications, investment portfolio updates, and high-net-worth client engagement via dedicated WhatsApp numbers" },
       { name: "Single Debt", industry: "Debt Resolution / Fintech", useCase: "debt repayment reminders, settlement negotiation chatbots, and compliant bulk outreach to borrowers via WhatsApp broadcasting" },
       { name: "Birla Brainiac", industry: "EdTech / Education", useCase: "student enrollment chatbots, fee reminder automation, parent-teacher communication, and course update broadcasts to thousands of students" },
-      { name: "Jarwa Education", industry: "Education", useCase: "admission inquiry automation, batch scheduling notifications, and student engagement through targeted WhatsApp campaigns" },
+      { name: "Jaro Education", industry: "EdTech / Higher Education", useCase: "admission inquiry automation, enrollment campaigns, batch scheduling notifications, and student engagement through targeted WhatsApp campaigns" },
+      { name: "Rimigo", industry: "Consumer Goods / D2C (Shark Tank India)", useCase: "customer order updates, post-purchase engagement, retention campaigns via WhatsApp broadcasts, and rapid response to customer queries using chatbots" },
       { name: "Ideal Academy", industry: "Education", useCase: "student onboarding workflows, fee collection reminders, and multi-agent support for student queries via a single WhatsApp number" },
       { name: "Legal Capital", industry: "Legal Services / Fintech", useCase: "client case status updates, document collection automation, compliance notifications, and case escalation alerts via WhatsApp" },
       { name: "Evolus", industry: "Healthcare / Aesthetics", useCase: "appointment reminders, post-treatment follow-ups, patient reactivation campaigns, and clinic-wide communication automation" },
@@ -1689,33 +1701,31 @@ Rules: No preamble. No closing line. No markdown. No asterisks. Start directly w
             {expiryDate && <div style={{ marginTop: 4, fontSize: 11, color: "#dc2626", fontWeight: 600 }}>Valid until {new Date(expiryDate).toLocaleDateString("en-IN", {day:"numeric",month:"long",year:"numeric"})}</div>}
           </div>
         </div>
-        <div style={{ padding: "38px 56px" }}>
-          <PrintSection title="Company Overview" theme={theme}>
-            <p style={{ color: "#374151", lineHeight: 1.9, margin: 0, fontSize: 13 }}>QuickSell is a conversational commerce company empowering global brands with scalable personal commerce and relationship-led sales on WhatsApp. Started in 2017 with a vision of enabling global brands to win more customers using simple yet robust technology on mobile, today we have over 7,000+ customers across 100+ countries using our technology to grow digitally.</p>
-          </PrintSection>
-          <PrintSection title="About DoubleTick" theme={theme}>
-            <p style={{ color: "#374151", lineHeight: 1.9, marginBottom: 12, fontSize: 13 }}>DoubleTick is a mobile-first conversational CRM built on top of WhatsApp Business API to unlock marketing and sales capabilities of WhatsApp with top-notch features such as a cloud-based team inbox, unlimited broadcast and bulk messaging, real-time broadcast analytics, dynamic cataloging, chatbot, commerce BOT and many more.</p>
-            <p style={{ color: "#374151", lineHeight: 1.9, marginBottom: 12, fontSize: 13 }}>Some of the brands powered by DoubleTick include GRT Jewellers, Raheja Developers, Sabyasachi, Tarun Tahiliani, ICRA, BVC Logistics, Tupperware, Birla Brainiacs KGK Group, Walking Tree, CKC Group, Malabar Diamonds and Gold, Emerald India, Prima Art, Siroya, SabyaSachi, etc. Backed by investors from Silicon Valley, Info Edge Ventures and BeeNext Asia, we are headquartered in Mumbai, India.</p>
-            <p style={{ color: "#374151", lineHeight: 1.9, marginBottom: 16, fontSize: 13 }}>DoubleTick.io is EU GDPR compliant, ISO 27001 certified, and a Meta Business Partner, powered by the Official WhatsApp Business API. Recognized as Meta Emerging Technology Partner of the Year 2025 and trusted by businesses globally.</p>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-              <div style={{ padding: "14px 18px", background: "#f0fdf8", borderRadius: 9, border: "1px solid #a7f0c8", fontSize: 12 }}>
-                <div style={{ fontWeight: 600, color: "#0b5235", marginBottom: 8 }}>Customer Reviews</div>
-                <div style={{ color: "#2d6a4f", lineHeight: 2 }}>
-                  G2: https://www.g2.com/products/doubletick-io/reviews<br />
-                  App Store: https://apps.apple.com/in/app/doubletick/id1662977073<br />
-                  Play Store: https://play.google.com/store/apps/details?id=io.doubletick.mobile.crm
-                </div>
-              </div>
-              <div style={{ padding: "14px 18px", background: "linear-gradient(135deg, #0b5235 0%, #0e7048 100%)", borderRadius: 9, border: "1px solid #a7f0c8", fontSize: 12, display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", textAlign: "center", gap: 10 }}>
-                <div style={{ width: 40, height: 40, borderRadius: "50%", background: "rgba(255,255,255,0.15)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="8" stroke="rgba(255,255,255,0.7)" strokeWidth="1.5"/><path d="M7 6l6 3-6 3V6z" fill="white"/></svg>
-                </div>
-                <div style={{ fontWeight: 700, color: "#fff", fontSize: 13 }}>See DoubleTick in Action</div>
-                <div style={{ color: "rgba(255,255,255,0.75)", fontSize: 11, lineHeight: 1.5 }}>Watch a short platform demo to understand how DoubleTick works</div>
-                <a href="https://drive.google.com/file/d/1WGYIn6KKjoDq0oE7tBmZw1GaRt6_eEzw/view" style={{ display: "inline-block", marginTop: 4, padding: "6px 16px", background: "rgba(255,255,255,0.18)", border: "1px solid rgba(255,255,255,0.35)", borderRadius: 20, color: "#fff", fontSize: 11.5, fontWeight: 600, textDecoration: "none", letterSpacing: 0.3 }}>▶ Watch Demo Video</a>
+        <div style={{ padding: "32px 56px 28px" }}>
+          {/* Company Overview */}
+          <div style={{ marginBottom: 18 }}>
+            <div style={{ fontFamily: "'EB Garamond', serif", fontSize: 16.5, fontWeight: 600, color: theme.sectionTitle, paddingBottom: 7, borderBottom: `1.5px solid ${theme.sectionBorder}`, marginBottom: 12 }}>Company Overview</div>
+            <p style={{ color: "#374151", lineHeight: 1.85, margin: "0 0 8px", fontSize: 13 }}>QuickSell is a conversational commerce company empowering global brands with scalable personal commerce and relationship-led sales on WhatsApp. Started in 2017 with a vision of enabling global brands to win more customers using simple yet robust technology on mobile, today we have over 7,000+ customers across 100+ countries using our technology to grow digitally.</p>
+            <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4 }}>
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5.5" stroke="#5aac88" strokeWidth="1.1"/><path d="M4.5 4l4 2-4 2V4z" fill="#5aac88"/></svg>
+              <a href="https://drive.google.com/file/d/1WGYIn6KKjoDq0oE7tBmZw1GaRt6_eEzw/view" style={{ fontSize: 11.5, color: "#5aac88", textDecoration: "none", fontWeight: 500, borderBottom: "1px solid rgba(90,172,136,0.35)" }}>Watch a short product demo</a>
+              <span style={{ fontSize: 11, color: "#9ca3af" }}>· 2 min overview</span>
+            </div>
+          </div>
+
+          {/* About DoubleTick */}
+          <div style={{ marginBottom: 18 }}>
+            <div style={{ fontFamily: "'EB Garamond', serif", fontSize: 16.5, fontWeight: 600, color: theme.sectionTitle, paddingBottom: 7, borderBottom: `1.5px solid ${theme.sectionBorder}`, marginBottom: 12 }}>About DoubleTick</div>
+            <p style={{ color: "#374151", lineHeight: 1.85, marginBottom: 10, fontSize: 13 }}>DoubleTick is a mobile-first conversational CRM built on top of WhatsApp Business API to unlock marketing and sales capabilities of WhatsApp — cloud-based team inbox, unlimited broadcasts, real-time analytics, dynamic cataloging, chatbot, commerce BOT and AI agents.</p>
+            <p style={{ color: "#374151", lineHeight: 1.85, marginBottom: 10, fontSize: 13 }}>Trusted by MakeMyTrip, Piramal Finance, Hiranandani, Lodha, Birla Brainiac, Akbar Travels, and 1,000+ brands globally. Backed by Info Edge Ventures, BeeNext Asia, and Silicon Valley investors. Headquartered in Mumbai, India.</p>
+            <p style={{ color: "#374151", lineHeight: 1.85, marginBottom: 14, fontSize: 13 }}>DoubleTick.io is <strong>EU GDPR compliant</strong>, <strong>ISO 27001 certified</strong>, a <strong>Meta Business Partner</strong>, and was recognized as <strong>Meta Emerging Technology Partner of the Year 2025</strong>.</p>
+            <div style={{ padding: "12px 16px", background: "#f0fdf8", borderRadius: 8, border: "1px solid #a7f0c8", fontSize: 12 }}>
+              <div style={{ fontWeight: 600, color: "#0b5235", marginBottom: 6, fontSize: 11.5 }}>Customer Reviews</div>
+              <div style={{ color: "#2d6a4f", lineHeight: 1.9, fontSize: 11.5 }}>
+                G2: https://www.g2.com/products/doubletick-io/reviews &nbsp;·&nbsp; App Store: https://apps.apple.com/in/app/doubletick/id1662977073 &nbsp;·&nbsp; Play Store: https://play.google.com/store/apps/details?id=io.doubletick.mobile.crm
               </div>
             </div>
-          </PrintSection>
+          </div>
         </div>
         <PrintFooter theme={theme} />
       </div>
@@ -2610,7 +2620,7 @@ Rules: No preamble. No closing line. No markdown. No asterisks. Start directly w
           {/* ── LEFT: Form panel ── */}
           <div style={{ flex: 1, minWidth: 0, overflowY: "auto" }}>
             {/* Pill steps sub-header (Concept B style) */}
-            <div style={{ borderBottom: `1px solid ${T.border}`, background: T.surface, padding: "0 32px", display: "flex", alignItems: "center", gap: 4 }}>
+            <div style={{ borderBottom: `1px solid ${T.border}`, background: T.surface, padding: isMobile ? "0 12px" : "0 32px", display: "flex", alignItems: "center", gap: 4, overflowX: "auto" }}>
               {/* Progress bar under steps */}
               <div style={{ display: "flex", alignItems: "center", gap: 0, padding: "12px 0", flex: 1 }}>
                 {STEPS.map((s, i) => {
@@ -2625,7 +2635,7 @@ Rules: No preamble. No closing line. No markdown. No asterisks. Start directly w
                         <div style={{ width: 18, height: 18, borderRadius: "50%", background: active ? "rgba(255,255,255,0.25)" : done ? T.green : T.surfaceHigh, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 9.5, fontWeight: 700, color: active || done ? "#fff" : T.textMuted, flexShrink: 0 }}>
                           {done ? "✓" : i + 1}
                         </div>
-                        <span style={{ fontSize: 12, fontWeight: active ? 700 : done ? 600 : 400, color: active ? "#fff" : done ? T.greenLt : T.textMuted, whiteSpace: "nowrap" }}>{s}</span>
+                        {!isMobile && <span style={{ fontSize: 12, fontWeight: active ? 700 : done ? 600 : 400, color: active ? "#fff" : done ? T.greenLt : T.textMuted, whiteSpace: "nowrap" }}>{s}</span>}
                       </div>
                       {i < STEPS.length - 1 && (
                         <div style={{ width: 20, height: 1.5, background: done ? T.green : T.border, transition: "background 0.3s", flexShrink: 0 }} />
@@ -2645,7 +2655,7 @@ Rules: No preamble. No closing line. No markdown. No asterisks. Start directly w
               )}
             </div>
             {/* Step content */}
-            <div style={{ maxWidth: 680, margin: "0 auto", padding: "40px 28px 100px" }}>
+            <div style={{ maxWidth: 680, margin: "0 auto", padding: isMobile ? "20px 14px 80px" : "40px 28px 100px" }}>
 
           {/* STEP 1 */}
           {step === 1 && (
@@ -2808,7 +2818,7 @@ Rules: No preamble. No closing line. No markdown. No asterisks. Start directly w
                 {/* ── VARIANT A: 3-column horizontal plan cards ── */}
                 <div style={{ marginTop: 20 }}>
                   <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.6px", color: "#64748b", textTransform: "uppercase", marginBottom: 10 }}>Plan</div>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
+                  <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr 1fr", gap: 10 }}>
                     {Object.entries(PLANS).map(([key, p]) => {
                       const isEnt = key === "enterprise";
                       const basePrice = isEnt ? (parseInt(enterpriseCustomPrice.replace(/[^0-9]/g, ""), 10) || null) : (p[billing] ?? p.quarterly);
@@ -3201,7 +3211,7 @@ Rules: No preamble. No closing line. No markdown. No asterisks. Start directly w
               <StepHead title="Review & Generate" sub="Optionally add a scope note, verify the summary, then generate your quotation." />
               <PanelCard>
                 <FField label="Scope of Work (optional)">
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+                  <div style={{ display: "grid", gridTemplateColumns: isNarrow ? "1fr" : "1fr 1fr", gap: 14 }}>
                     {/* LEFT — editable textarea */}
                     <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                       <textarea
@@ -3240,7 +3250,7 @@ Rules: No preamble. No closing line. No markdown. No asterisks. Start directly w
                 </FField>
 
                 {/* ── SETTINGS ROW: expiry + ROI toggle + template save ── */}
-                <div style={{ marginTop: 20, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+                <div style={{ marginTop: 20, display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 14 }}>
                   <FField label="Quotation Expiry Date (optional)">
                     <input type="date" value={expiryDate} onChange={e => setExpiryDate(e.target.value)} style={{ ...baseInput, fontSize: 13 }} />
                   </FField>
@@ -3399,7 +3409,7 @@ ${emailDraft.body}`)} style={{ marginLeft: "auto", fontSize: 11, color: T.greenL
           </div>
 
           {/* ── RIGHT: Live PDF preview panel (Concept D) ── */}
-          <div style={{ width: 340, flexShrink: 0, borderLeft: `1px solid ${T.border}`, background: "#1a2535", display: "flex", flexDirection: "column", position: "sticky", top: 60, height: "calc(100vh - 60px)" }}>
+          <div style={{ width: isMobile ? 0 : isTablet ? 280 : 340, flexShrink: 0, borderLeft: isMobile ? "none" : `1px solid ${T.border}`, background: "#1a2535", display: isMobile ? "none" : "flex", flexDirection: "column", position: "sticky", top: 60, height: "calc(100vh - 60px)", overflow: "hidden" }}>
             {/* Panel header */}
             <div style={{ padding: "12px 16px", borderBottom: `1px solid ${T.border}`, display: "flex", alignItems: "center", justifyContent: "space-between", background: T.surface }}>
               <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
