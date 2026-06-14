@@ -672,7 +672,19 @@ async function generateROIWithGroq({ clientName, companyName, planName, billing,
   // Pull out key features that hint at their use case
   const featureHighlights = features.slice(0, 8).join(", ");
 
-  const prompt = `You are a senior B2B ROI analyst writing a personalised Return on Investment page for a sales quotation.
+  const prompt = `You are a senior B2B ROI analyst writing a personalised Return on Investment page for a sales quotation from DoubleTick — India's leading WhatsApp Business API platform.
+
+DOUBLETICK PLATFORM CONTEXT (use this to write accurate, specific benefits):
+DoubleTick serves 1000+ brands across real estate, travel, finance, education, healthcare, and legal sectors.
+Key platform capabilities:
+- Multi-WABA & multi-agent: entire teams share one WhatsApp number; multiple numbers managed in one dashboard
+- Broadcasting: reach thousands of opted-in contacts with approved template campaigns
+- AI Agents & Chatbots: 24/7 lead qualification, FAQ handling, and automated workflows
+- AI Calling: automated voice outreach with WhatsApp follow-ups
+- CTWA (Click-to-WhatsApp Ads): direct Facebook/Instagram ad-to-WhatsApp pipeline
+- Frictionless Messaging: customers respond on WhatsApp — no app download, no friction
+- Deep CRM integrations: Zoho, HubSpot, Bitrix, IndiaMart sync
+Proven outcomes at brands like MakeMyTrip, Piramal Finance, Hiranandani, Birla Brainiac, and Lodha.
 
 CLIENT CONTEXT:
 - Company: ${companyName} (contact: ${clientName})
@@ -685,28 +697,28 @@ CLIENT CONTEXT:
 ${scopeContext}
 
 TASK:
-Write a highly specific, numbers-driven ROI summary for ${companyName}. Use their actual scope and add-ons to derive realistic estimates. Do NOT write generic WhatsApp CRM benefits — write benefits specific to what ${companyName} is actually getting.
+Write a highly specific, numbers-driven ROI summary for ${companyName}. Derive realistic estimates from their scope, plan, and selected add-ons. Reference DoubleTick capabilities accurately. Do NOT write generic WhatsApp CRM benefits — every point must be specific to what ${companyName} is actually getting.
 
 OUTPUT FORMAT (follow exactly):
 For ${companyName}:
-[1 punchy opening line about their specific situation, no bullet point]
+[1 punchy opening line about their specific situation and what DoubleTick unlocks for them — no bullet point]
 
 Efficiency Gains:
-[3-4 bullets with % improvements specific to their use case and add-ons]
+[3-4 bullets with % improvements derived from their scope and features. Reference specific features like broadcasting, chatbot, multi-agent, CTWA where applicable.]
 
 Cost Savings:
-[3 bullets with ₹ monthly estimates, derived from their investment and team size context]
+[3 bullets with ₹ monthly estimates. Derive from their investment, team context, and the cost of manual processes they're replacing.]
 
 Business Impact:
-[3 bullets on revenue/growth outcomes specific to their industry/scope]
+[3 bullets on revenue/growth outcomes specific to their industry and scope. Reference real outcomes from similar DoubleTick customers where relevant.]
 
 STRICT RULES:
 - No emoji, no markdown, no asterisks
 - Section headers end with colon only
 - Plain text bullets — no dashes, no numbers
-- All numbers must be ranges (e.g. 40-60%, ₹12,000-18,000/month)
+- All numbers must be ranges (e.g. 40–60%, ₹12,000–18,000/month)
 - Reference ${companyName} by name at least twice in the bullets
-- Reference specific features they selected (e.g. CTWA, chatbot, CAPI, SLA) where relevant
+- Reference specific add-ons or features they selected where relevant
 - Start directly with "For ${companyName}:" — no preamble`;
 
   const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
@@ -1435,39 +1447,81 @@ Thank you for considering DoubleTick! 🙏`;
   // Case study generation
   const handleGenerateCaseStudy = async () => {
     setCaseStudyLoading(true);
-    // Rotate through different client pairs on each call to force variety
-    const ALL_CLIENTS = [
-      ["GRT Jewellers", "Raheja Developers"],
-      ["Sabyasachi", "Tupperware"],
-      ["BVC Logistics", "Malabar Diamonds"],
-      ["ICRA", "Birla Brainiacs"],
-      ["GRT Jewellers", "BVC Logistics"],
-      ["Tupperware", "Raheja Developers"],
-      ["Malabar Diamonds", "Sabyasachi"],
+
+    // Real DoubleTick customers organized by industry
+    const CLIENT_POOL = [
+      { name: "MakeMyTrip", industry: "Travel & Tourism", useCase: "high-volume customer support, automated booking confirmations, post-trip engagement, and multi-agent WhatsApp handling across millions of travelers" },
+      { name: "Akbar Travels", industry: "Travel & Tourism (Dubai)", useCase: "real-time booking updates, itinerary sharing, multi-WABA setup for UAE and India offices, and multi-agent support" },
+      { name: "Hiranandani", industry: "Real Estate", useCase: "lead qualification chatbots, automated site-visit scheduling, and nurturing home-buyers through the sales funnel via WhatsApp" },
+      { name: "Lodha", industry: "Real Estate", useCase: "broadcasting project launches and inventory updates to thousands of prospects, automated site-visit reminders, and broker engagement workflows" },
+      { name: "M3M India", industry: "Real Estate", useCase: "multi-agent lead handling, CTWA (Click-to-WhatsApp) ad campaigns, and instant response automation for high-intent property enquiries" },
+      { name: "Tiger Properties", industry: "Real Estate (Dubai)", useCase: "WhatsApp-first sales workflows for international property buyers, investor communication across UAE, and frictionless cross-border engagement" },
+      { name: "Piramal Finance", industry: "Financial Services / NBFC", useCase: "loan application status updates, EMI payment reminders via WhatsApp, and customer onboarding automation at scale" },
+      { name: "ASK Wealth", industry: "Wealth Management", useCase: "relationship manager communications, investment portfolio updates, and high-net-worth client engagement via dedicated WhatsApp numbers" },
+      { name: "Single Debt", industry: "Debt Resolution / Fintech", useCase: "debt repayment reminders, settlement negotiation chatbots, and compliant bulk outreach to borrowers via WhatsApp broadcasting" },
+      { name: "Birla Brainiac", industry: "EdTech / Education", useCase: "student enrollment chatbots, fee reminder automation, parent-teacher communication, and course update broadcasts to thousands of students" },
+      { name: "Jarwa Education", industry: "Education", useCase: "admission inquiry automation, batch scheduling notifications, and student engagement through targeted WhatsApp campaigns" },
+      { name: "Ideal Academy", industry: "Education", useCase: "student onboarding workflows, fee collection reminders, and multi-agent support for student queries via a single WhatsApp number" },
+      { name: "Legal Capital", industry: "Legal Services / Fintech", useCase: "client case status updates, document collection automation, compliance notifications, and case escalation alerts via WhatsApp" },
+      { name: "Evolus", industry: "Healthcare / Aesthetics", useCase: "appointment reminders, post-treatment follow-ups, patient reactivation campaigns, and clinic-wide communication automation" },
     ];
-    const pair = ALL_CLIENTS[Math.floor(Math.random() * ALL_CLIENTS.length)];
+
+    // DoubleTick platform capabilities for the AI to reference accurately
+    const DT_USPS = `DoubleTick platform capabilities (reference these for accurate solution descriptions):
+- Multi-WABA: manage multiple WhatsApp Business numbers under one dashboard
+- Multi-agent, single-number: entire team handles one WhatsApp number simultaneously
+- Broadcasting: send bulk messages to thousands of opted-in contacts via approved templates
+- AI Agents & Chatbots: 24/7 automated response flows, FAQ bots, lead qualification chatbots
+- AI Calling: automated voice outreach integrated with WhatsApp follow-up sequences
+- CTWA (Click-to-WhatsApp Ads): Facebook/Instagram ads that open WhatsApp directly
+- Frictionless Messaging: zero-friction conversations — no app download required for end customers
+- CRM Integrations: Zoho, HubSpot, Bitrix, IndiaMart, and custom API connections`;
+
+    // Pick 2 clients from different industries — bias toward scope relevance
+    const scopeLower = (scope || "").toLowerCase();
+    const scored = CLIENT_POOL.map(c => {
+      const combined = (c.industry + " " + c.useCase).toLowerCase();
+      let score = Math.random(); // base randomness for variety
+      if ((scopeLower.includes("real estate") || scopeLower.includes("property")) && combined.includes("real estate")) score += 4;
+      if ((scopeLower.includes("travel") || scopeLower.includes("tour")) && combined.includes("travel")) score += 4;
+      if ((scopeLower.includes("finance") || scopeLower.includes("loan") || scopeLower.includes("wealth") || scopeLower.includes("bank")) && (combined.includes("financ") || combined.includes("wealth") || combined.includes("debt"))) score += 4;
+      if ((scopeLower.includes("school") || scopeLower.includes("education") || scopeLower.includes("edtech") || scopeLower.includes("academy")) && (combined.includes("edtech") || combined.includes("education"))) score += 4;
+      if ((scopeLower.includes("legal") || scopeLower.includes("law")) && combined.includes("legal")) score += 4;
+      if ((scopeLower.includes("health") || scopeLower.includes("clinic") || scopeLower.includes("hospital")) && combined.includes("health")) score += 4;
+      return { ...c, score };
+    }).sort((a, b) => b.score - a.score);
+
+    const first = scored[0];
+    const second = scored.find(c => c.industry !== first.industry) ?? scored[1];
+    const pair = [first, second];
+
     try {
-      const prompt = `You are a B2B SaaS sales expert at DoubleTick (WhatsApp CRM).
-Write 2 different client case studies for a proposal for ${companyName} (scope context: ${scope || "general business"}).
+      const prompt = `You are a B2B SaaS sales expert at DoubleTick — India's leading WhatsApp Business API platform serving 1000+ brands across real estate, travel, finance, education, healthcare, and legal industries.
 
-YOU MUST use EXACTLY these 2 clients — do not substitute: ${pair[0]} and ${pair[1]}.
+Write 2 client case studies for a proposal being sent to ${companyName} (scope: ${scope || "general business automation via WhatsApp"}).
 
-Write each case study fresh and specific to that client's actual industry. Do not reuse phrasing from previous outputs.
+${DT_USPS}
 
-STRICT OUTPUT FORMAT — follow exactly:
-${pair[0]}:
+YOU MUST use EXACTLY these 2 clients — do not substitute: ${pair[0].name} and ${pair[1].name}.
+
+Context to guide accuracy (do not copy verbatim — write naturally and specifically):
+- ${pair[0].name} (${pair[0].industry}): ${pair[0].useCase}
+- ${pair[1].name} (${pair[1].industry}): ${pair[1].useCase}
+
+STRICT OUTPUT FORMAT — follow exactly, no deviations:
+${pair[0].name}:
 Industry: [their actual industry]
-Challenge: [specific problem they had before DoubleTick — be specific, include a pain point]
-Solution: [exactly what DoubleTick feature or workflow solved it]
-Result: [specific measurable outcome — use a %, ₹ figure, or time metric]
+Challenge: [specific problem before DoubleTick — 1 sentence, concrete pain point with a number if possible]
+Solution: [exact DoubleTick feature(s) used — name the feature explicitly, e.g. "multi-agent inbox", "broadcasting", "CTWA campaigns"]
+Result: [measurable outcome with a metric: %, ₹ figure, or time saved. E.g. "Reduced lead response time by 80%, from 6 hours to under 20 minutes."]
 
-${pair[1]}:
+${pair[1].name}:
 Industry: [their actual industry]
-Challenge: [specific problem they had before DoubleTick — be specific, include a pain point]
-Solution: [exactly what DoubleTick feature or workflow solved it]
-Result: [specific measurable outcome — use a %, ₹ figure, or time metric]
+Challenge: [specific problem before DoubleTick — 1 sentence, concrete pain point]
+Solution: [exact DoubleTick feature(s) used — name the feature explicitly]
+Result: [measurable outcome with a metric]
 
-Rules: No preamble. No closing line. Start directly with "${pair[0]}:". Each field on its own line. Blank line between the two case studies.`;
+Rules: No preamble. No closing line. No markdown. No asterisks. Start directly with "${pair[0].name}:". Each field on its own line. One blank line between the two case studies.`;
 
       const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
         method: "POST",
@@ -1475,8 +1529,8 @@ Rules: No preamble. No closing line. Start directly with "${pair[0]}:". Each fie
         body: JSON.stringify({
           model: "llama-3.3-70b-versatile",
           messages: [{ role: "user", content: prompt }],
-          temperature: 0.85,
-          max_tokens: 600,
+          temperature: 0.8,
+          max_tokens: 700,
           top_p: 0.95,
         }),
       });
