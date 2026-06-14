@@ -142,10 +142,37 @@ const ADDON_CATALOG = [
   {
     id: "whatsapp_flows",
     group: "Platform Features",
-    label: "WhatsApp Flows",
-    desc: "Create native WhatsApp forms to capture structured customer data.",
-    plans: ["pro"],
-    monthly: 600, quarterly: 1800, halfYearly: null, yearly: 8496,
+    label: "WhatsApp Flows [Static]",
+    desc: "Collect customer data effortlessly using native WhatsApp forms (static templates).",
+    plans: ["pro", "enterprise", "standard"],
+    monthly: 708, quarterly: 2124, halfYearly: 4248, yearly: 8496,
+    perUnit: false,
+  },
+  {
+    id: "whatsapp_flows_dynamic",
+    group: "Platform Features",
+    label: "WhatsApp Flows [Dynamic]",
+    desc: "Fully dynamic WhatsApp forms with conditional logic and real-time data population.",
+    plans: ["pro", "enterprise", "standard"],
+    monthly: 1000, quarterly: 3000, halfYearly: 6000, yearly: 12000,
+    perUnit: false,
+  },
+  {
+    id: "cx_overview",
+    group: "Platform Features",
+    label: "CX Overview",
+    desc: "360° customer experience dashboard — unified view of all interactions, CSAT scores, and team performance metrics.",
+    plans: ["pro", "enterprise"],
+    monthly: 15000, quarterly: 45000, halfYearly: 90000, yearly: 180000,
+    perUnit: false,
+  },
+  {
+    id: "enterprise_security",
+    group: "Platform Features",
+    label: "Enterprise Security / PII Security",
+    desc: "Advanced data security layer with PII masking, audit logs, role-based data access, and compliance controls.",
+    plans: ["pro", "enterprise"],
+    monthly: 1980, quarterly: 5940, halfYearly: 11880, yearly: 23760,
     perUnit: false,
   },
   {
@@ -214,29 +241,37 @@ const ADDON_CATALOG = [
   {
     id: "zoho_crm",
     group: "Integrations",
-    label: "Zoho CRM Integration",
-    desc: "Sync leads, contacts, and deals between DoubleTick and Zoho CRM.",
+    label: "Zoho CRM Integration [2-way sync]",
+    desc: "Zoho integration enables seamless 2-way sync of customer data and custom fields. Chat with customers directly from the Zoho dashboard for faster engagement.",
     plans: ["pro", "enterprise", "standard"],
-    monthly: null, quarterly: 5000, halfYearly: null, yearly: 20000,
-    iframeYearly: 25000,
+    monthly: 1800, quarterly: 5400, halfYearly: 10800, yearly: 21600,
+    perUnit: false,
+  },
+  {
+    id: "zoho_crm_iframe",
+    group: "Integrations",
+    label: "Zoho CRM Integration [iFrame + 2-way sync]",
+    desc: "Full Zoho integration with embedded DoubleTick iFrame inside Zoho CRM — seamless 2-way data sync and chat from within the Zoho dashboard.",
+    plans: ["pro", "enterprise", "standard"],
+    monthly: 2500, quarterly: 7500, halfYearly: 15000, yearly: 30000,
     perUnit: false,
   },
   {
     id: "hubspot",
     group: "Integrations",
     label: "HubSpot Integration",
-    desc: "Connect HubSpot contacts and deal pipelines with WhatsApp conversations.",
+    desc: "Automatically send messages on new leads and run drip campaigns to nurture prospects.",
     plans: ["pro", "enterprise", "standard"],
-    monthly: null, quarterly: 5000, halfYearly: null, yearly: 18000,
+    monthly: 1800, quarterly: 5400, halfYearly: 10800, yearly: 21600,
     perUnit: false,
   },
   {
     id: "indiamart",
     group: "Integrations",
     label: "IndiaMart Integration",
-    desc: "Automatically capture and respond to IndiaMart leads via WhatsApp.",
+    desc: "Ensure every IndiaMart lead is promptly engaged by automatically sending a WhatsApp message as soon as the lead arrives.",
     plans: ["pro", "enterprise", "standard"],
-    monthly: null, quarterly: 5000, halfYearly: null, yearly: 18000,
+    monthly: 1800, quarterly: 5400, halfYearly: 10800, yearly: 21600,
     perUnit: false,
   },
   {
@@ -253,9 +288,9 @@ const ADDON_CATALOG = [
     id: "bitrix",
     group: "Integrations",
     label: "Bitrix Integration",
-    desc: "Connect Bitrix24 CRM tasks and contacts with DoubleTick conversations.",
+    desc: "Two-way lead sync and send messages to your leads once the deal is created and closed successfully.",
     plans: ["pro", "enterprise", "standard"],
-    monthly: null, quarterly: 5000, halfYearly: null, yearly: 18000,
+    monthly: 1800, quarterly: 5400, halfYearly: 10800, yearly: 21600,
     perUnit: false,
   },
   {
@@ -330,6 +365,15 @@ const ADDON_CATALOG = [
     desc: "Add external collaborators with limited access to specific conversations or projects.",
     plans: ["pro", "enterprise", "standard"],
     monthly: 7000, quarterly: 21000, halfYearly: null, yearly: 84000,
+    perUnit: false,
+  },
+  {
+    id: "additional_support",
+    group: "Platform Extras",
+    label: "Additional Support",
+    desc: "Extended dedicated support package with priority response SLAs and a named support engineer.",
+    plans: ["pro", "enterprise", "standard"],
+    monthly: 5000, quarterly: 15000, halfYearly: 30000, yearly: 60000,
     perUnit: false,
   },
   // ── ONE-TIME & USAGE ────────────────────────────────────────────────────────
@@ -1599,12 +1643,22 @@ Rules: No preamble. No closing line. Start directly with "${pair[0]}:". Each fie
             <p style={{ color: "#374151", lineHeight: 1.9, marginBottom: 12, fontSize: 13 }}>DoubleTick is a mobile-first conversational CRM built on top of WhatsApp Business API to unlock marketing and sales capabilities of WhatsApp with top-notch features such as a cloud-based team inbox, unlimited broadcast and bulk messaging, real-time broadcast analytics, dynamic cataloging, chatbot, commerce BOT and many more.</p>
             <p style={{ color: "#374151", lineHeight: 1.9, marginBottom: 12, fontSize: 13 }}>Some of the brands powered by DoubleTick include GRT Jewellers, Raheja Developers, Sabyasachi, Tarun Tahiliani, ICRA, BVC Logistics, Tupperware, Birla Brainiacs KGK Group, Walking Tree, CKC Group, Malabar Diamonds and Gold, Emerald India, Prima Art, Siroya, SabyaSachi, etc. Backed by investors from Silicon Valley, Info Edge Ventures and BeeNext Asia, we are headquartered in Mumbai, India.</p>
             <p style={{ color: "#374151", lineHeight: 1.9, marginBottom: 16, fontSize: 13 }}>DoubleTick.io is EU GDPR compliant, ISO 27001 certified, and a Meta Business Partner, powered by the Official WhatsApp Business API. Recognized as Meta Emerging Technology Partner of the Year 2025 and trusted by businesses globally.</p>
-            <div style={{ padding: "14px 18px", background: "#f0fdf8", borderRadius: 9, border: "1px solid #a7f0c8", fontSize: 12 }}>
-              <div style={{ fontWeight: 600, color: "#0b5235", marginBottom: 8 }}>Customer Reviews</div>
-              <div style={{ color: "#2d6a4f", lineHeight: 2 }}>
-                G2: https://www.g2.com/products/doubletick-io/reviews<br />
-                App Store: https://apps.apple.com/in/app/doubletick/id1662977073<br />
-                Play Store: https://play.google.com/store/apps/details?id=io.doubletick.mobile.crm
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+              <div style={{ padding: "14px 18px", background: "#f0fdf8", borderRadius: 9, border: "1px solid #a7f0c8", fontSize: 12 }}>
+                <div style={{ fontWeight: 600, color: "#0b5235", marginBottom: 8 }}>Customer Reviews</div>
+                <div style={{ color: "#2d6a4f", lineHeight: 2 }}>
+                  G2: https://www.g2.com/products/doubletick-io/reviews<br />
+                  App Store: https://apps.apple.com/in/app/doubletick/id1662977073<br />
+                  Play Store: https://play.google.com/store/apps/details?id=io.doubletick.mobile.crm
+                </div>
+              </div>
+              <div style={{ padding: "14px 18px", background: "linear-gradient(135deg, #0b5235 0%, #0e7048 100%)", borderRadius: 9, border: "1px solid #a7f0c8", fontSize: 12, display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", textAlign: "center", gap: 10 }}>
+                <div style={{ width: 40, height: 40, borderRadius: "50%", background: "rgba(255,255,255,0.15)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="8" stroke="rgba(255,255,255,0.7)" strokeWidth="1.5"/><path d="M7 6l6 3-6 3V6z" fill="white"/></svg>
+                </div>
+                <div style={{ fontWeight: 700, color: "#fff", fontSize: 13 }}>See DoubleTick in Action</div>
+                <div style={{ color: "rgba(255,255,255,0.75)", fontSize: 11, lineHeight: 1.5 }}>Watch a short platform demo to understand how DoubleTick works</div>
+                <a href="https://drive.google.com/file/d/1WGYIn6KKjoDq0oE7tBmZw1GaRt6_eEzw/view" style={{ display: "inline-block", marginTop: 4, padding: "6px 16px", background: "rgba(255,255,255,0.18)", border: "1px solid rgba(255,255,255,0.35)", borderRadius: 20, color: "#fff", fontSize: 11.5, fontWeight: 600, textDecoration: "none", letterSpacing: 0.3 }}>▶ Watch Demo Video</a>
               </div>
             </div>
           </PrintSection>
