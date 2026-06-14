@@ -529,6 +529,12 @@ function saveSettings(s) {
   try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(s)); } catch {}
 }
 
+// ─── DRAFT AUTO-SAVE ──────────────────────────────────────────────────────────
+const DRAFT_KEY = "dt_quotation_draft";
+function saveDraft(data) { try { localStorage.setItem(DRAFT_KEY, JSON.stringify({ ...data, _savedAt: Date.now() })); } catch {} }
+function loadDraft() { try { return JSON.parse(localStorage.getItem(DRAFT_KEY) || "null"); } catch { return null; } }
+function clearDraft() { try { localStorage.removeItem(DRAFT_KEY); } catch {} }
+
 // ─── QUOTATION REFERENCE ID ────────────────────────────────────────────────────
 function generateQID() {
   const year = new Date().getFullYear();
@@ -575,6 +581,25 @@ const THEMES = {
     sectionBorder: "#bfdbfe",
     sectionTitle: "#0f1f3d",
     checkColor: "#3b82f6",
+  },
+  gold: {
+    headerBg: "linear-gradient(135deg, #78350f 0%, #b45309 50%, #d97706 100%)",
+    headerSolid: "#78350f",
+    headerMid: "#92400e",
+    accent: "#d97706",
+    accentLight: "#fef3c7",
+    subHeaderBg: "#fffbeb",
+    subHeaderBorder: "#fcd34d",
+    subHeaderText: "#92400e",
+    footerBg: "#fefce8",
+    footerBorder: "#d97706",
+    rowEven: "#fffdf7",
+    tableDivider: "#fef3c7",
+    tableHeaderBg: "linear-gradient(135deg, #78350f, #d97706)",
+    catBorder: "#fde68a",
+    sectionBorder: "#fcd34d",
+    sectionTitle: "#78350f",
+    checkColor: "#d97706",
   },
 };
 
@@ -1116,8 +1141,44 @@ export default function App() {
   ]);
   const [pstnChannels, setPstnChannels] = useState(1);
   const [pstnAICalling, setPstnAICalling] = useState(false);
+  const [draftBanner, setDraftBanner] = useState(() => {
+    const d = loadDraft();
+    return d && d._savedAt && (Date.now() - d._savedAt) < 7 * 24 * 60 * 60 * 1000 ? d : null;
+  });
   const logoRef = useRef();
   const docRef = useRef();
+
+  // ── Auto-save draft every 30 seconds ──────────────────────────────────────
+  useEffect(() => {
+    const id = setInterval(() => {
+      if (!clientName && !companyName) return; // nothing meaningful to save
+      saveDraft({ plan, billing, addons, iframeSelections, discount, addonDiscounts, addonQty,
+        enterpriseCustomPrice, enterpriseAIBots, customAddonsList, customFeatures,
+        scope, includeROI, roiText, includeTimeline, includeCaseStudy, caseStudyText,
+        expiryDate, pdfTheme, clientName, companyName, email, pstnChannels, pstnAICalling });
+    }, 30000);
+    return () => clearInterval(id);
+  }, [plan, billing, addons, iframeSelections, discount, addonDiscounts, addonQty,
+      enterpriseCustomPrice, enterpriseAIBots, customAddonsList, customFeatures,
+      scope, includeROI, roiText, includeTimeline, includeCaseStudy, caseStudyText,
+      expiryDate, pdfTheme, clientName, companyName, email, pstnChannels, pstnAICalling]);
+
+  const restoreDraft = (d) => {
+    setPlan(d.plan ?? "pro"); setBilling(d.billing ?? "quarterly");
+    setAddons(d.addons || []); setIframeSelections(d.iframeSelections || {});
+    setDiscount(d.discount || 0); setAddonDiscounts(d.addonDiscounts || {});
+    setAddonQty(d.addonQty || {}); setEnterpriseCustomPrice(d.enterpriseCustomPrice || "");
+    setEnterpriseAIBots(d.enterpriseAIBots || false); setCustomAddonsList(d.customAddonsList || []);
+    setCustomFeatures(d.customFeatures ?? null); setScope(d.scope || "");
+    setIncludeROI(d.includeROI || false); setRoiText(d.roiText || "");
+    setIncludeTimeline(d.includeTimeline || false); setIncludeCaseStudy(d.includeCaseStudy || false);
+    setCaseStudyText(d.caseStudyText || ""); setExpiryDate(d.expiryDate || "");
+    setPdfTheme(d.pdfTheme || "green"); setClientName(d.clientName || "");
+    setCompanyName(d.companyName || ""); setEmail(d.email || "");
+    setPstnChannels(d.pstnChannels || 1); setPstnAICalling(d.pstnAICalling || false);
+    setDraftBanner(null);
+    clearDraft();
+  };
 
   const planData = PLANS[plan];
   const isEnterpriseCustom = plan === "enterprise";
@@ -1269,6 +1330,27 @@ To proceed or for any queries, please reply to this message or contact us direct
 
 Thank you for considering DoubleTick! 🙏`;
     window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, "_blank");
+  };
+
+  // WhatsApp share from builder preview
+  const handleBuilderWhatsAppShare = () => {
+    const expiryStr = expiryDate
+      ? `\nValid until: ${new Date(expiryDate).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}`
+      : "";
+    const discountStr = discount > 0 ? `\nDiscount: ${discount}% applied` : "";
+    const msg = `Hi ${clientName || "there"},
+
+Please find your DoubleTick quotation details below:
+
+📋 *Ref:* ${qid}
+🏢 *Client:* ${companyName || "—"}
+📦 *Plan:* DoubleTick ${planData.name} — ${effectiveBillingLabel}
+💰 *Total:* ₹${totalGST.toLocaleString("en-IN")} (incl. GST)${discountStr}${expiryStr}
+
+The full quotation PDF has been shared separately. To proceed or for any queries, please reply to this message.
+
+Thank you for considering DoubleTick! 🙏`;
+    window.open(`https://wa.me/${email && email.match(/^\d{10,}$/) ? "91" + email : ""}?text=${encodeURIComponent(msg)}`, "_blank");
   };
 
   // Save current quote to log
@@ -1980,18 +2062,48 @@ Rules: No preamble. No closing line. Start directly with "${pair[0]}:". Each fie
 
           {/* PDF Theme Toggle */}
           <div style={{ display: "flex", background: T.surfaceHigh, borderRadius: 8, border: `1px solid ${T.border}`, overflow: "hidden" }}>
-            {[["green","Green"],["navy","Navy"]].map(([t, label]) => (
-              <button key={t} onClick={() => setPdfTheme(t)} style={{ padding: "6px 12px", background: pdfTheme === t ? T.green : "transparent", border: "none", color: pdfTheme === t ? "#fff" : T.textMuted, cursor: "pointer", fontSize: 11.5, fontWeight: 600 }}>{label}</button>
+            {[["green","Green"],["navy","Navy"],["gold","Gold"]].map(([t, label]) => (
+              <button key={t} onClick={() => setPdfTheme(t)}
+                style={{ padding: "6px 12px", background: pdfTheme === t ? (t === "gold" ? "#d97706" : t === "navy" ? "#1a3360" : T.green) : "transparent", border: "none", color: pdfTheme === t ? "#fff" : T.textMuted, cursor: "pointer", fontSize: 11.5, fontWeight: 600 }}>
+                {label}
+              </button>
             ))}
           </div>
           {preview ? (
             <>
               <button onClick={() => setPreview(false)} style={{ padding: "8px 16px", background: "transparent", border: `1px solid ${T.borderMed}`, borderRadius: 7, color: T.textSub, cursor: "pointer", fontSize: 13, fontWeight: 500 }}>← Edit</button>
+              <button onClick={handleBuilderWhatsAppShare} title="Send via WhatsApp"
+                style={{ padding: "8px 16px", background: "rgba(37,211,102,0.12)", border: "1px solid rgba(37,211,102,0.35)", borderRadius: 7, color: "#25d366", cursor: "pointer", fontSize: 13, fontWeight: 600, display: "flex", alignItems: "center", gap: 7 }}>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="#25d366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.096.537 4.07 1.482 5.793L.057 24l6.345-1.438A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.885 0-3.65-.49-5.186-1.348l-.371-.214-3.768.854.888-3.662-.233-.38A10 10 0 012 12C2 6.486 6.486 2 12 2s10 4.486 10 10-4.486 10-10 10z"/></svg>
+                WhatsApp
+              </button>
               <button onClick={download} style={{ padding: "8px 20px", background: `linear-gradient(135deg, ${T.green}, ${T.greenDk})`, border: "none", borderRadius: 7, color: "#fff", cursor: "pointer", fontSize: 13, fontWeight: 600, display: "flex", alignItems: "center", gap: 8 }}>↓ Download PDF</button>
             </>
           ) : null}
         </div>
       </div>
+
+      {/* ── DRAFT RESTORE BANNER ── */}
+      {draftBanner && (
+        <div style={{ background: "rgba(217,119,6,0.08)", borderBottom: "1px solid rgba(217,119,6,0.25)", padding: "10px 28px", display: "flex", alignItems: "center", gap: 14 }}>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="#d97706" strokeWidth="1.5"/><path d="M8 4.5v4l2.5 2" stroke="#d97706" strokeWidth="1.5" strokeLinecap="round"/></svg>
+          <span style={{ fontSize: 12.5, color: "#d97706", fontWeight: 600 }}>Unsaved draft found</span>
+          <span style={{ fontSize: 12, color: "#92400e" }}>
+            {draftBanner.clientName ? `${draftBanner.clientName} · ` : ""}{draftBanner.companyName || ""}
+            {draftBanner._savedAt ? ` · ${new Date(draftBanner._savedAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}` : ""}
+          </span>
+          <div style={{ marginLeft: "auto", display: "flex", gap: 8 }}>
+            <button onClick={() => restoreDraft(draftBanner)}
+              style={{ padding: "5px 14px", background: "#d97706", border: "none", borderRadius: 6, color: "#fff", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>
+              Restore Draft
+            </button>
+            <button onClick={() => { clearDraft(); setDraftBanner(null); }}
+              style={{ padding: "5px 12px", background: "transparent", border: "1px solid rgba(217,119,6,0.3)", borderRadius: 6, color: "#92400e", fontSize: 12, cursor: "pointer" }}>
+              Discard
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* ── QUOTE LOG DRAWER ── */}
       {showQuoteLog && (
