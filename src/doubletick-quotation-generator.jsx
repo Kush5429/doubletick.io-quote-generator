@@ -1650,8 +1650,8 @@ Rules: No preamble. No closing line. Start directly with "${pair[0]}:". Each fie
                       ) : null;
                     })()}
                   </td>
-                  <td style={{ ...pTdr, padding: "14px 18px" }}>
-                    <div style={{ fontSize: 15, fontWeight: 800, color: "#111827" }}>INR {fmtINR(planPrice)}/-</div>
+                  <td style={{ ...pTdr, padding: "14px 18px", whiteSpace: "nowrap" }}>
+                    <div style={{ fontSize: 15, fontWeight: 800, color: "#111827", whiteSpace: "nowrap" }}>INR {fmtINR(planPrice)}/-</div>
                   </td>
                 </tr>
 
@@ -1696,7 +1696,7 @@ Rules: No preamble. No closing line. Start directly with "${pair[0]}:". Each fie
                         {a.desc && <div style={{ fontSize: 10.5, color: "#9ca3af", fontStyle: "italic", lineHeight: 1.5, marginTop: 1 }}>{a.desc}</div>}
                         {a.perUnit && getQty(a.id) > 1 && <div style={{ fontSize: 10.5, color: "#9ca3af", marginTop: 1 }}>{getQty(a.id)} × {a.unitLabel} @ ₹{fmtINR(getAddonUnitPrice(a, plan, billing))}/{a.unitLabel}</div>}
                       </td>
-                      <td style={{ ...pTdr, padding: "10px 18px", verticalAlign: "middle" }}>
+                      <td style={{ ...pTdr, padding: "10px 18px", verticalAlign: "middle", whiteSpace: "nowrap" }}>
                         {isCustomAddon ? (
                           <div>
                             <div style={{ fontSize: 11, fontWeight: 600, color: "#6b7280", fontStyle: "italic", textAlign: "right" }}>{a.custom}</div>
@@ -1747,8 +1747,8 @@ Rules: No preamble. No closing line. Start directly with "${pair[0]}:". Each fie
                   <td colSpan={2} style={{ padding: "14px 18px", textAlign: "right", fontSize: 12.5, color: "#6b7280", borderTop: `2px solid ${theme.subHeaderBorder}`, fontWeight: 500 }}>
                     Subtotal + 18% GST
                   </td>
-                  <td style={{ padding: "14px 18px", textAlign: "right", borderTop: `2px solid ${theme.subHeaderBorder}` }}>
-                    <div style={{ fontSize: 18, fontWeight: 800, color: theme.sectionTitle }}>INR {fmtINR(totalGST)}/-</div>
+                  <td style={{ padding: "14px 18px", textAlign: "right", borderTop: `2px solid ${theme.subHeaderBorder}`, whiteSpace: "nowrap" }}>
+                    <div style={{ fontSize: 18, fontWeight: 800, color: theme.sectionTitle, whiteSpace: "nowrap" }}>INR {fmtINR(totalGST)}/-</div>
                   </td>
                 </tr>
               </tbody>
