@@ -1698,13 +1698,20 @@ Rules: No preamble. No closing line. Start directly with "${pair[0]}:". Each fie
                       </td>
                       <td style={{ ...pTdr, padding: "10px 18px", verticalAlign: "middle" }}>
                         {isCustomAddon ? (
-                          <div style={{ fontSize: 12.5, fontWeight: 600, color: theme.accent, fontStyle: "italic" }}>{a.custom}</div>
+                          <div>
+                            <div style={{ fontSize: 11, fontWeight: 600, color: "#6b7280", fontStyle: "italic", textAlign: "right" }}>{a.custom}</div>
+                            {a.id === "pstn" && pstnChannels > 0 && (
+                              <div style={{ fontSize: 10, color: "#9ca3af", marginTop: 2, textAlign: "right" }}>
+                                ₹{fmtINR(a.dtFeePerChannelPerMonth * pstnChannels)}/mo DT fee · {pstnChannels} channel{pstnChannels > 1 ? "s" : ""}
+                              </div>
+                            )}
+                          </div>
                         ) : (
                           <>
                             {disc > 0 && linePrice != null && (
                               <div style={{ fontSize: 10.5, color: "#9ca3af", textDecoration: "line-through", textAlign: "right", marginBottom: 2 }}>INR {fmtINR(linePrice)}/-</div>
                             )}
-                            <div style={{ fontSize: 14, fontWeight: 700, color: disc > 0 ? "#16a34a" : "#111827" }}>INR {fmtINR(discountedLine ?? linePrice)}/-</div>
+                            <div style={{ fontSize: 15, fontWeight: 800, color: disc > 0 ? "#16a34a" : "#111827" }}>INR {fmtINR(discountedLine ?? linePrice)}/-</div>
                             <div style={{ fontSize: 10, color: "#9ca3af", marginTop: 1 }}>{BILLING_LABELS[billing]}</div>
                           </>
                         )}
@@ -1722,8 +1729,12 @@ Rules: No preamble. No closing line. Start directly with "${pair[0]}:". Each fie
                       {ca.desc && <div style={{ fontSize: 11.5, color: "#6b7280", marginTop: 3, lineHeight: 1.5, fontStyle: "italic" }}>{ca.desc}</div>}
                     </td>
                     <td style={{ ...pTdr, padding: "13px 18px" }}>
-                      <div style={{ fontSize: 13.5, fontWeight: 700, color: theme.accent, fontStyle: "italic" }}>{ca.price ? `INR ${Number(ca.price).toLocaleString("en-IN")}/-` : "—"}</div>
-                      {ca.billing !== "custom" && <div style={{ fontSize: 10, color: "#9ca3af", marginTop: 1 }}>{ca.billing}</div>}
+                      <div style={{ fontSize: 15, fontWeight: 800, color: "#111827" }}>{ca.price ? `INR ${Number(ca.price).toLocaleString("en-IN")}/-` : "—"}</div>
+                      {ca.billing && ca.billing !== "custom" && (
+                        <div style={{ fontSize: 10, color: "#9ca3af", marginTop: 1 }}>
+                          {({ monthly: "per month", quarterly: "per 3 months", halfYearly: "per 6 months", yearly: "per year" }[ca.billing]) || ca.billing}
+                        </div>
+                      )}
                     </td>
                   </tr>
                 ))}
