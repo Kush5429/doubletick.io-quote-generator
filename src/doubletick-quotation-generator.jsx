@@ -1901,7 +1901,7 @@ Rules: No preamble. No closing line. No markdown. No asterisks. Start directly w
             </tr></thead>
             <tbody>
               {rows.map(r => (
-                <tr key={r.key}>
+                <tr key={r.key} style={{ breakInside: "avoid" }}>
                   <td style={{ padding: "22px 0", borderBottom: `1px solid ${LINE}`, verticalAlign: "top" }}>
                     <div style={{ fontFamily: serif, fontSize: 16.5, fontWeight: 500, lineHeight: 1.2 }}>
                       {r.name}
@@ -1938,7 +1938,7 @@ Rules: No preamble. No closing line. No markdown. No asterisks. Start directly w
           </table>
 
           {/* TOTALS */}
-          <div style={{ marginTop: 22, marginLeft: "auto", width: 300 }}>
+          <div style={{ marginTop: 22, marginLeft: "auto", width: 300, breakInside: "avoid" }}>
             <div style={{ display: "flex", justifyContent: "space-between", padding: "9px 0", fontSize: 12.5, color: INK2 }}><span>Subtotal</span><b style={{ color: INK, fontWeight: 600 }}>{money(total)}</b></div>
             <div style={{ display: "flex", justifyContent: "space-between", padding: "9px 0", fontSize: 12.5, color: INK2 }}><span>Sales tax / VAT</span><b style={{ color: INK, fontWeight: 500 }}>As applicable</b></div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginTop: 8, paddingTop: 16, borderTop: `1.5px solid ${INK}` }}>
@@ -1960,7 +1960,7 @@ Rules: No preamble. No closing line. No markdown. No asterisks. Start directly w
                 ["Validity", expiryDate ? `This quotation is valid until ${validTxt}.` : "This quotation is valid for 30 days from the date of issue."],
                 ["Refunds", "Refer to our refund & cancellation policy at doubletick.io/refund-and-cancellations."],
               ].map(([k, v]) => (
-                <div key={k} style={{ display: "grid", gridTemplateColumns: "154px 1fr", gap: 20, padding: "12px 0", borderBottom: `1px solid ${LINE}` }}>
+                <div key={k} style={{ display: "grid", gridTemplateColumns: "154px 1fr", gap: 20, padding: "12px 0", borderBottom: `1px solid ${LINE}`, breakInside: "avoid" }}>
                   <div style={{ fontSize: 9.5, letterSpacing: "0.14em", textTransform: "uppercase", color: MUT, fontWeight: 600, paddingTop: 2 }}>{k}</div>
                   <div style={{ fontSize: 11.5, color: INK2, lineHeight: 1.7 }}>{v}</div>
                 </div>
@@ -1968,7 +1968,7 @@ Rules: No preamble. No closing line. No markdown. No asterisks. Start directly w
             </div>
 
             {compliance && (
-              <div style={{ marginTop: 22, background: "#EDF3EA", border: `1px solid ${LINE2}`, borderLeft: `3px solid ${A}`, borderRadius: 6, padding: "18px 20px" }}>
+              <div style={{ marginTop: 22, background: "#EDF3EA", border: `1px solid ${LINE2}`, borderLeft: `3px solid ${A}`, borderRadius: 6, padding: "18px 20px", breakInside: "avoid" }}>
                 <div style={{ fontSize: 9.5, letterSpacing: "0.16em", textTransform: "uppercase", color: A, fontWeight: 600, marginBottom: 10 }}>Messaging Compliance</div>
                 <div style={{ fontSize: 11.5, color: INK2, lineHeight: 1.65 }}><b style={{ color: INK }}>{compliance.region}.</b> {compliance.text}</div>
               </div>
@@ -1976,7 +1976,7 @@ Rules: No preamble. No closing line. No markdown. No asterisks. Start directly w
           </div>
 
           {/* SIGNATURE */}
-          <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 40 }}>
+          <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 40, breakInside: "avoid" }}>
             <div style={{ width: 250, textAlign: "right" }}>
               <img src={INTL_SIGN} alt="Authorised Signatory — Shivam Mittal" style={{ width: 230, height: "auto", display: "block", marginLeft: "auto" }} />
               <div style={{ fontSize: 9, letterSpacing: "0.18em", textTransform: "uppercase", color: MUT, marginTop: 10 }}>Authorised Signatory</div>
