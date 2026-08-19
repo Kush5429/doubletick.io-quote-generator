@@ -1840,6 +1840,7 @@ Rules: No preamble. No closing line. No markdown. No asterisks. Start directly w
     const cyc = (a) => flatBook[a.id]?.oneTime ? "one-time" : (BILLING_LABELS[billing] || billing);
     const compliance = COMPLIANCE_NOTES[REGIONS[region].compliance];
     const serif = "'Newsreader', 'EB Garamond', serif";
+    const planFeats = plan === "enterprise" ? (customFeatures || ENTERPRISE_BASE_FEATURES) : (planData.features || []);
     const rows = [];
     rows.push({ key: "__plan", name: planData.name + " Plan", desc: null, price: planPrice, cycle: BILLING_LABELS[billing] || billing });
     numericAddons.forEach(a => rows.push({
@@ -1970,6 +1971,22 @@ Rules: No preamble. No closing line. No markdown. No asterisks. Start directly w
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginTop: 8, paddingTop: 16, borderTop: `1.5px solid ${INK}` }}>
               <span style={{ ...LBL, fontSize: 10 }}>Total</span>
               <span style={{ fontFamily: serif, fontSize: 30, fontWeight: 600, letterSpacing: "-0.01em" }}>{money(totalGST)}</span>
+            </div>
+          </div>
+
+          {/* INCLUDED FEATURES */}
+          <div style={{ marginTop: 44 }}>
+            <div style={{ fontFamily: serif, fontSize: 19, fontWeight: 500, borderBottom: `1px solid ${LINE2}`, paddingBottom: 10, marginBottom: 16 }}>DoubleTick {planData.name} Plan — Included Features</div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "9px 30px" }}>
+              {planFeats.map((f, i) => (
+                <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 9, fontSize: 12, color: INK2, lineHeight: 1.5, breakInside: "avoid" }}>
+                  <span style={{ color: A, flexShrink: 0, fontSize: 9, marginTop: 3 }}>▶</span>
+                  <span>{f}</span>
+                </div>
+              ))}
+            </div>
+            <div style={{ marginTop: 18, background: "#EDF3EA", border: `1px solid ${LINE2}`, borderLeft: `3px solid ${A}`, borderRadius: 6, padding: "12px 16px", fontSize: 11, color: INK2, lineHeight: 1.6, breakInside: "avoid" }}>
+              <b style={{ color: INK }}>Note:</b> The features listed above are included as part of the {planData.name} plan subscription. Features not listed here are not part of the base plan and may be available as separate add-ons.
             </div>
           </div>
 
