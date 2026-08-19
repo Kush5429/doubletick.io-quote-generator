@@ -1940,7 +1940,6 @@ Rules: No preamble. No closing line. No markdown. No asterisks. Start directly w
           {/* TOTALS */}
           <div style={{ marginTop: 22, marginLeft: "auto", width: 300, breakInside: "avoid" }}>
             <div style={{ display: "flex", justifyContent: "space-between", padding: "9px 0", fontSize: 12.5, color: INK2 }}><span>Subtotal</span><b style={{ color: INK, fontWeight: 600 }}>{money(total)}</b></div>
-            <div style={{ display: "flex", justifyContent: "space-between", padding: "9px 0", fontSize: 12.5, color: INK2 }}><span>Sales tax / VAT</span><b style={{ color: INK, fontWeight: 500 }}>As applicable</b></div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginTop: 8, paddingTop: 16, borderTop: `1.5px solid ${INK}` }}>
               <span style={{ ...LBL, fontSize: 10 }}>Total</span>
               <span style={{ fontFamily: serif, fontSize: 30, fontWeight: 600, letterSpacing: "-0.01em" }}>{money(totalGST)}</span>
@@ -1953,12 +1952,12 @@ Rules: No preamble. No closing line. No markdown. No asterisks. Start directly w
             <div style={{ marginTop: 16 }}>
               {[
                 ["Payment", "Full payment is due in advance, prior to account activation."],
-                ["Taxation", `All amounts are stated in ${REGIONS[region].currency} and are exclusive of any applicable sales tax or VAT, which will be added as required by local regulation. Onboarding requires a valid trade license or VAT certificate.`],
+                ["Taxation", `All amounts are stated in ${REGIONS[region].currency} and are exclusive of taxes. A valid trade license or VAT certificate is required only for WhatsApp Business (Meta) verification — it is not a tax on this quotation.`],
                 ["Purchase Order", `Upon acceptance, ${teamName} shall issue a Purchase Order to formalise the commercial agreement.`],
                 ["Billing & Renewal", `Billed ${effectiveBillingLabel.toLowerCase()}. Renewal terms shall be mutually agreed prior to the next cycle.`],
-                ["WhatsApp Charges", "WhatsApp conversation charges are billed directly by Meta on a prepaid basis via the DoubleTick Wallet and are not included above. Current rates: doubletick.io/conversation-cost."],
+                ["WhatsApp Charges", <>WhatsApp conversation charges are billed directly by Meta on a prepaid basis via the DoubleTick Wallet and are not included above. Current rates: <a href="https://doubletick.io/conversation-cost" style={{ color: A }}>doubletick.io/conversation-cost</a>.</>],
                 ["Validity", expiryDate ? `This quotation is valid until ${validTxt}.` : "This quotation is valid for 30 days from the date of issue."],
-                ["Refunds", "Refer to our refund & cancellation policy at doubletick.io/refund-and-cancellations."],
+                ["Refunds", <>Refer to our refund &amp; cancellation policy at <a href="https://doubletick.io/refund-and-cancellations" style={{ color: A }}>doubletick.io/refund-and-cancellations</a>.</>],
               ].map(([k, v]) => (
                 <div key={k} style={{ display: "grid", gridTemplateColumns: "154px 1fr", gap: 20, padding: "12px 0", borderBottom: `1px solid ${LINE}`, breakInside: "avoid" }}>
                   <div style={{ fontSize: 9.5, letterSpacing: "0.14em", textTransform: "uppercase", color: MUT, fontWeight: 600, paddingTop: 2 }}>{k}</div>
