@@ -1947,8 +1947,8 @@ Rules: No preamble. No closing line. No markdown. No asterisks. Start directly w
           </div>
 
           {/* TERMS */}
-          <div style={{ marginTop: 46, paddingTop: 26, borderTop: `1px solid ${LINE2}` }}>
-            <div style={{ fontFamily: serif, fontSize: 19, fontWeight: 500 }}>Terms &amp; Conditions</div>
+          <div style={{ breakBefore: "page", pageBreakBefore: "always", paddingTop: 8 }}>
+            <div style={{ fontFamily: serif, fontSize: 19, fontWeight: 500, marginBottom: 2 }}>Terms &amp; Conditions</div>
             <div style={{ marginTop: 16 }}>
               {[
                 ["Payment", "Full payment is due in advance, prior to account activation."],
