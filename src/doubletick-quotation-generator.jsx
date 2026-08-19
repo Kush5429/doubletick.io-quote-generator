@@ -1981,6 +1981,33 @@ Rules: No preamble. No closing line. No markdown. No asterisks. Start directly w
               <div style={{ fontSize: 9, letterSpacing: "0.18em", textTransform: "uppercase", color: MUT, marginTop: 10 }}>Authorised Signatory</div>
             </div>
           </div>
+
+          {/* COMPANY BACKGROUND */}
+          <div style={{ breakBefore: "page", pageBreakBefore: "always", paddingTop: 8 }}>
+            <div style={{ fontFamily: serif, fontSize: 19, fontWeight: 500 }}>Company Overview</div>
+            <p style={{ fontSize: 12, color: INK2, lineHeight: 1.8, margin: "12px 0 0" }}>QuickSell is a conversational commerce company empowering global brands with scalable personal commerce and relationship-led sales on WhatsApp. Started in 2017 with a vision of enabling global brands to win more customers using simple yet robust technology on mobile, today we have over 7,000+ customers across 100+ countries using our technology to grow digitally.</p>
+            <div style={{ fontSize: 11.5, marginTop: 10 }}>
+              <a href="https://drive.google.com/file/d/1WGYIn6KKjoDq0oE7tBmZw1GaRt6_eEzw/view" style={{ color: A, fontWeight: 600 }}>Watch a short product demo</a>
+              <span style={{ color: MUT }}> · 2 min overview</span>
+            </div>
+
+            <div style={{ fontFamily: serif, fontSize: 19, fontWeight: 500, marginTop: 30 }}>About DoubleTick</div>
+            <p style={{ fontSize: 12, color: INK2, lineHeight: 1.8, margin: "12px 0 0" }}>DoubleTick is a mobile-first conversational CRM built on top of WhatsApp Business API to unlock marketing and sales capabilities of WhatsApp — cloud-based team inbox, unlimited broadcasts, real-time analytics, dynamic cataloging, chatbot, commerce BOT and AI agents.</p>
+            <p style={{ fontSize: 12, color: INK2, lineHeight: 1.8, margin: "10px 0 0" }}>Trusted by MakeMyTrip, Piramal Finance, Hiranandani, Lodha, Birla Brainiac, Tiger Properties, M3M, MG Motors, Silver Arrows, Akbar Travels, and 1,000+ brands globally. Backed by Info Edge Ventures, BeeNext Asia, and Silicon Valley investors. Headquartered in Mumbai, India.</p>
+
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 16 }}>
+              {["EU GDPR compliant", "ISO 27001 certified", "Meta Business Partner", "Meta Emerging Technology Partner of the Year 2025"].map(cert => (
+                <span key={cert} style={{ fontSize: 10.5, color: INK2, background: "#EDF3EA", border: `1px solid ${LINE2}`, borderRadius: 20, padding: "4px 12px" }}>{cert}</span>
+              ))}
+            </div>
+
+            <div style={{ ...LBL, marginTop: 30, marginBottom: 10 }}>Customer Reviews</div>
+            <div style={{ fontSize: 11.5, color: INK2, lineHeight: 2 }}>
+              <span style={{ color: MUT }}>G2</span> &nbsp;<a href="https://www.g2.com/products/doubletick-io/reviews" style={{ color: A }}>g2.com/products/doubletick-io/reviews</a><br />
+              <span style={{ color: MUT }}>App Store</span> &nbsp;<a href="https://apps.apple.com/in/app/doubletick/id1662977073" style={{ color: A }}>apps.apple.com/in/app/doubletick</a><br />
+              <span style={{ color: MUT }}>Play Store</span> &nbsp;<a href="https://play.google.com/store/apps/details?id=io.doubletick.mobile.crm" style={{ color: A }}>play.google.com/store/apps/details?id=io.doubletick.mobile.crm</a>
+            </div>
+          </div>
         </div>
 
         <div style={{ padding: "16px 60px", borderTop: `1px solid ${LINE}`, display: "flex", justifyContent: "space-between", fontSize: 9, letterSpacing: "0.16em", textTransform: "uppercase", color: MUT, background: "#EEF3EA" }}>
@@ -2007,7 +2034,7 @@ Rules: No preamble. No closing line. No markdown. No asterisks. Start directly w
               <div style={{ fontSize: 12, color: "rgba(255,255,255,0.65)", lineHeight: 1.85, marginTop: 2 }}>
                 Office No. 3, 4th Floor, Second Avenue, Connekt Coworks,<br />
                 Subhash Nagar, Andheri East, Mumbai, Maharashtra — 400093<br />
-                kush.ambekar@quicksell.co &nbsp;&nbsp;|&nbsp;&nbsp; +91 79778 14709
+                kush.ambekar@doubletick.io &nbsp;&nbsp;|&nbsp;&nbsp; +91 79778 14709
               </div>
             </div>
             <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", justifyContent: "center" }}>
