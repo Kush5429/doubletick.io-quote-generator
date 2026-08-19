@@ -323,13 +323,38 @@ const ADDON_CATALOG = [
   },
   // ── PLATFORM EXTRAS ────────────────────────────────────────────────────────
   {
+    id: "ai_agents",
+    group: "Platform Extras",
+    label: "AI Agents",
+    desc: "Deploy AI agents for automated WhatsApp messaging and voice. Includes a monthly credit allocation that auto-refreshes each month while the add-on stays active. Not available on the Starter plan.",
+    plans: ["pro", "enterprise"],
+    // Per-plan pricing across billing cycles (INR). Resolved via getAddonUnitPrice().
+    planPricing: {
+      pro:        { monthly: 3500,  quarterly: 14000, halfYearly: 28000,  yearly: 42000 },
+      enterprise: { monthly: 14000, quarterly: 56000, halfYearly: 112000, yearly: 168000 },
+    },
+    // Kept null so any generic price lookup falls back to planPricing.
+    monthly: null, quarterly: null, halfYearly: null, yearly: null,
+    perUnit: false,
+    isAIAgents: true,
+    // Plan-based entitlements (refreshed monthly). Extra credits beyond these
+    // are purchased from the wallet at AI_CREDIT_RATE and roll over month to month.
+    aiAgents: {
+      pro:        { credits: 3500,  bots: 10, instructions: 10000, kbMB: 50  },
+      enterprise: { credits: 20000, bots: 50, instructions: 10000, kbMB: 100 },
+    },
+    // Credit consumption reference (informational, shown to the client).
+    consumption: { reply: 1, callPerMin: 10 },
+  },
+  {
     id: "ai_chatbots",
     group: "Platform Extras",
-    label: "AI Chat Bots (ChatGPT-Based)",
-    desc: "Deploy AI-powered chatbots for automated customer conversations. Requires ChatGPT Plus subscription.",
+    label: "AI Chat Bots (Legacy · ChatGPT-Based)",
+    desc: "Legacy AI chatbot add-on. Retained for existing subscribers only — new deployments should use the AI Agents add-on. Requires ChatGPT Plus subscription.",
     plans: ["pro", "enterprise", "standard"],
     monthly: 15000, quarterly: 45000, halfYearly: null, yearly: 180000,
     perUnit: false,
+    isLegacy: true,
   },
   {
     id: "key_account",
@@ -443,8 +468,16 @@ function getAddonsForPlan(plan, billing) {
   });
 }
 
+// Per-credit rate (INR) for wallet-funded additional AI Agent credits. These
+// credits roll over month to month, unlike the plan's included monthly allocation.
+const AI_CREDIT_RATE = 0.5;
+
 function getAddonUnitPrice(a, plan, billing) {
   if (a.custom) return null;
+  // Add-ons that price differently per plan expose a planPricing map.
+  if (a.planPricing) {
+    return a.planPricing[plan]?.[billing] ?? null;
+  }
   // Seats have plan-specific pricing for pro
   if (a.id === "additional_seats" && plan === "pro") {
     if (billing === "monthly") return a.proMonthly ?? null;
@@ -1141,6 +1174,7 @@ export default function App() {
   const [billing, setBilling] = useState("quarterly");
   const [plan, setPlan] = useState("pro");
   const [addonQty, setAddonQty] = useState({}); // { addonId: quantity }
+  const [aiExtraCredits, setAiExtraCredits] = useState(0); // additional AI Agent credits (wallet-funded, roll over)
   const [addonDiscounts, setAddonDiscounts] = useState({}); // { addonId: 0-30 }
   const [enterpriseAIBots, setEnterpriseAIBots] = useState(false);
   const [enterpriseCustomPrice, setEnterpriseCustomPrice] = useState("");
@@ -1222,13 +1256,13 @@ export default function App() {
       saveDraft({ plan, billing, addons, iframeSelections, discount, addonDiscounts, addonQty,
         enterpriseCustomPrice, enterpriseAIBots, customAddonsList, customFeatures,
         scope, includeROI, roiText, includeTimeline, includeCaseStudy, caseStudyText,
-        expiryDate, pdfTheme, clientName, companyName, email, pstnChannels, pstnAICalling });
+        expiryDate, pdfTheme, clientName, companyName, email, pstnChannels, pstnAICalling, aiExtraCredits });
     }, 30000);
     return () => clearInterval(id);
   }, [plan, billing, addons, iframeSelections, discount, addonDiscounts, addonQty,
       enterpriseCustomPrice, enterpriseAIBots, customAddonsList, customFeatures,
       scope, includeROI, roiText, includeTimeline, includeCaseStudy, caseStudyText,
-      expiryDate, pdfTheme, clientName, companyName, email, pstnChannels, pstnAICalling]);
+      expiryDate, pdfTheme, clientName, companyName, email, pstnChannels, pstnAICalling, aiExtraCredits]);
 
   const restoreDraft = (d) => {
     setPlan(d.plan ?? "pro"); setBilling(d.billing ?? "quarterly");
@@ -1243,6 +1277,7 @@ export default function App() {
     setPdfTheme(d.pdfTheme || "green"); setClientName(d.clientName || "");
     setCompanyName(d.companyName || ""); setEmail(d.email || "");
     setPstnChannels(d.pstnChannels || 1); setPstnAICalling(d.pstnAICalling || false);
+    setAiExtraCredits(d.aiExtraCredits || 0);
     setDraftBanner(null);
     clearDraft();
   };
@@ -1271,9 +1306,9 @@ export default function App() {
     const t = {
       id: Date.now(),
       name: templateName.trim(),
-      plan, billing, addons, iframeSelections, discount, addonDiscounts,
+      plan, billing, addons, iframeSelections, discount, addonDiscounts, addonQty,
       enterpriseCustomPrice, enterpriseAIBots,
-      customAddonsList, customFeatures,
+      customAddonsList, customFeatures, aiExtraCredits,
       createdAt: new Date().toLocaleDateString("en-IN"),
     };
     const updated = [t, ...templates].slice(0, 20);
@@ -1292,6 +1327,8 @@ export default function App() {
     setAddonDiscounts(t.addonDiscounts && typeof t.addonDiscounts === "object" ? t.addonDiscounts : {});
     setEnterpriseCustomPrice(t.enterpriseCustomPrice ?? "");
     setEnterpriseAIBots(t.enterpriseAIBots === true);
+    setAddonQty(t.addonQty && typeof t.addonQty === "object" ? t.addonQty : {});
+    setAiExtraCredits(t.aiExtraCredits || 0);
     setCustomAddonsList(Array.isArray(t.customAddonsList) ? t.customAddonsList : []);
     setCustomFeatures(Array.isArray(t.customFeatures) ? t.customFeatures : null);
     setShowTemplates(false);
@@ -1429,7 +1466,7 @@ Thank you for considering DoubleTick! 🙏`;
       timestamp: Date.now(),
       // snapshot of state for reload
       snapshot: { plan, billing, addons, iframeSelections, discount, addonDiscounts, addonQty,
-        enterpriseCustomPrice, enterpriseAIBots, customAddonsList, customFeatures,
+        enterpriseCustomPrice, enterpriseAIBots, customAddonsList, customFeatures, aiExtraCredits,
         scope, includeROI, roiText, includeTimeline, includeCaseStudy, caseStudyText, expiryDate,
         pdfTheme, clientName, companyName, email }
     };
@@ -1446,6 +1483,7 @@ Thank you for considering DoubleTick! 🙏`;
     setDiscount(s.discount || 0); setAddonDiscounts(s.addonDiscounts || {});
     setAddonQty(s.addonQty || {}); setEnterpriseCustomPrice(s.enterpriseCustomPrice || "");
     setEnterpriseAIBots(s.enterpriseAIBots || false); setCustomAddonsList(s.customAddonsList || []);
+    setAiExtraCredits(s.aiExtraCredits || 0);
     setCustomFeatures(s.customFeatures ?? null); setScope(s.scope || "");
     setIncludeROI(s.includeROI || false); setRoiText(s.roiText || "");
     setIncludeTimeline(s.includeTimeline || false); setIncludeCaseStudy(s.includeCaseStudy || false);
@@ -1615,10 +1653,20 @@ Rules: No preamble. No closing line. No markdown. No asterisks. Start directly w
     if (raw == null) return null;
     return Math.round(raw * (1 - getAddonDiscount(a.id) / 100));
   };
+  // ── AI Agents add-on helpers ────────────────────────────────────────────────
+  const aiAgentsAddon = ADDON_CATALOG.find(a => a.id === "ai_agents");
+  const aiAgentsSelected = addons.includes("ai_agents") && aiAgentsAddon?.plans.includes(plan);
+  const aiAgentsPlan = aiAgentsSelected ? plan : null;
+  const aiAgentsMeta = aiAgentsPlan ? aiAgentsAddon.aiAgents[aiAgentsPlan] : null;
+  const aiExtraCreditsQty = aiAgentsSelected ? Math.max(0, parseInt(aiExtraCredits, 10) || 0) : 0;
+  const aiExtraCreditsAmount = Math.round(aiExtraCreditsQty * AI_CREDIT_RATE);
+
   const addonSumOriginal = numericAddons.reduce((s, a) => s + (getAddonLinePrice(a) ?? 0), 0)
-    + customAddonsList.reduce((s, ca) => s + (parseInt(ca.price) || 0), 0);
+    + customAddonsList.reduce((s, ca) => s + (parseInt(ca.price) || 0), 0)
+    + aiExtraCreditsAmount;
   const addonSum = numericAddons.reduce((s, a) => s + (getAddonDiscountedPrice(a) ?? 0), 0)
-    + customAddonsList.reduce((s, ca) => s + (parseInt(ca.price) || 0), 0);
+    + customAddonsList.reduce((s, ca) => s + (parseInt(ca.price) || 0), 0)
+    + aiExtraCreditsAmount;
   const totalAddonSaving = addonSumOriginal - addonSum;
   const total = planPrice + addonSum;
   const totalGST = Math.round(total * 1.18);
@@ -1774,14 +1822,16 @@ Rules: No preamble. No closing line. No markdown. No asterisks. Start directly w
                 </tr>
 
                 {/* Optional Add-ons sub-header */}
-                {(numericAddons.length > 0 || customAddons.length > 0 || customAddonsList.length > 0) && (
+                {(numericAddons.length > 0 || customAddons.length > 0 || customAddonsList.length > 0 || aiExtraCreditsQty > 0) && (
                   <tr>
                     <td colSpan={3} style={{ padding: "0" }}>
                       <div style={{ display: "flex", alignItems: "center", background: theme.subHeaderBg, borderTop: `2px solid ${theme.subHeaderBorder}`, borderBottom: `1px solid ${theme.subHeaderBorder}`, padding: "8px 18px", gap: 10 }}>
                         <div style={{ width: 3, height: 16, background: theme.accent, borderRadius: 2, flexShrink: 0 }} />
                         <span style={{ fontSize: 10, fontWeight: 700, color: theme.sectionTitle, textTransform: "uppercase", letterSpacing: 1.8 }}>Optional Add-ons</span>
                         <span style={{ fontSize: 10.5, color: "#9ca3af" }}>selected by {companyName}</span>
-                        <div style={{ marginLeft: "auto", fontSize: 10, color: "#9ca3af" }}>{numericAddons.length + customAddons.length + customAddonsList.length} item{(numericAddons.length + customAddons.length + customAddonsList.length) !== 1 ? "s" : ""}</div>
+                        {(() => { const n = numericAddons.length + customAddons.length + customAddonsList.length + (aiExtraCreditsQty > 0 ? 1 : 0); return (
+                        <div style={{ marginLeft: "auto", fontSize: 10, color: "#9ca3af" }}>{n} item{n !== 1 ? "s" : ""}</div>
+                        ); })()}
                       </div>
                     </td>
                   </tr>
@@ -1813,6 +1863,12 @@ Rules: No preamble. No closing line. No markdown. No asterisks. Start directly w
                         </div>
                         {a.desc && <div style={{ fontSize: 10.5, color: "#9ca3af", fontStyle: "italic", lineHeight: 1.5, marginTop: 1 }}>{a.desc}</div>}
                         {a.perUnit && getQty(a.id) > 1 && <div style={{ fontSize: 10.5, color: "#9ca3af", marginTop: 1 }}>{getQty(a.id)} × {a.unitLabel} @ ₹{fmtINR(getAddonUnitPrice(a, plan, billing))}/{a.unitLabel}</div>}
+                        {a.isAIAgents && a.aiAgents[plan] && (
+                          <div style={{ fontSize: 10.5, color: "#6b7280", marginTop: 3, lineHeight: 1.5 }}>
+                            Includes <strong>{fmtINR(a.aiAgents[plan].credits)} credits/month</strong> (auto-refreshed) · up to {a.aiAgents[plan].bots} AI bots · {fmtINR(a.aiAgents[plan].instructions)}-char instructions · {a.aiAgents[plan].kbMB} MB knowledge base.
+                            <br />Usage: {a.consumption.reply} credit / reply · {a.consumption.callPerMin} credits / min of AI call.
+                          </div>
+                        )}
                       </td>
                       <td style={{ ...pTdr, padding: "10px 18px", verticalAlign: "middle", whiteSpace: "nowrap" }}>
                         {isCustomAddon ? (
@@ -1856,6 +1912,24 @@ Rules: No preamble. No closing line. No markdown. No asterisks. Start directly w
                     </td>
                   </tr>
                 ))}
+
+                {/* Additional AI Credits (one-time, wallet-funded) */}
+                {aiExtraCreditsQty > 0 && (() => {
+                  const idx = numericAddons.length + customAddons.length + customAddonsList.length;
+                  return (
+                    <tr style={{ background: idx % 2 === 0 ? "#fafafa" : "#fff" }}>
+                      <td style={{ ...pTdc, padding: "13px 16px", color: "#9ca3af", fontSize: 12 }}>{idx + 2}</td>
+                      <td style={{ ...pTdl, padding: "13px 18px" }}>
+                        <div style={{ fontWeight: 600, color: "#374151", fontSize: 13 }}>Additional AI Credits</div>
+                        <div style={{ fontSize: 10.5, color: "#9ca3af", fontStyle: "italic", lineHeight: 1.5, marginTop: 1 }}>{fmtINR(aiExtraCreditsQty)} credits × ₹{AI_CREDIT_RATE.toFixed(2)} · one-time wallet top-up · rolls over month to month.</div>
+                      </td>
+                      <td style={{ ...pTdr, padding: "13px 18px", whiteSpace: "nowrap" }}>
+                        <div style={{ fontSize: 15, fontWeight: 800, color: "#111827" }}>INR {fmtINR(aiExtraCreditsAmount)}/-</div>
+                        <div style={{ fontSize: 10, color: "#9ca3af", marginTop: 1 }}>one-time</div>
+                      </td>
+                    </tr>
+                  );
+                })()}
 
                 {/* Savings row */}
 
@@ -3029,6 +3103,53 @@ Rules: No preamble. No closing line. No markdown. No asterisks. Start directly w
                                   {pstnAICalling && <div style={{ fontSize: 11, color: "#6b7280", marginTop: 4 }}>Calling charges: ₹0.40/min + AI: ₹5/min</div>}
                                 </div>
                               )}
+                              {/* AI Agents configurator */}
+                              {a.isAIAgents && on && a.aiAgents[plan] && (() => {
+                                const meta = a.aiAgents[plan];
+                                const extra = Math.max(0, parseInt(aiExtraCredits, 10) || 0);
+                                const extraCost = Math.round(extra * AI_CREDIT_RATE);
+                                const entChip = (label, value) => (
+                                  <div style={{ background: "#0b1015", border: "1px solid #1c2836", borderRadius: 8, padding: "8px 10px" }}>
+                                    <div style={{ fontSize: 9.5, color: "#4a6070", textTransform: "uppercase", letterSpacing: 0.6, fontWeight: 700, marginBottom: 3 }}>{label}</div>
+                                    <div style={{ fontSize: 13, fontWeight: 700, color: "#e4eaf0" }}>{value}</div>
+                                  </div>
+                                );
+                                return (
+                                  <div style={{ borderTop: `1px solid ${T.border}`, padding: "12px 16px", background: "rgba(23,160,102,0.04)" }}>
+                                    <div style={{ fontSize: 10.5, color: "#4a6070", fontWeight: 700, letterSpacing: 0.6, textTransform: "uppercase", marginBottom: 8 }}>Included every month · auto-refreshes while active</div>
+                                    <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 8, marginBottom: 10 }}>
+                                      {entChip("Monthly credits", `${fmtINR(meta.credits)} / mo`)}
+                                      {entChip("Max AI bots", meta.bots)}
+                                      {entChip("Instructions", `${fmtINR(meta.instructions)} chars`)}
+                                      {entChip("Knowledge base", `${meta.kbMB} MB`)}
+                                    </div>
+                                    <div style={{ fontSize: 11, color: "#6d8497", marginBottom: 12, lineHeight: 1.5 }}>
+                                      Consumption: <strong style={{ color: "#9db3c4" }}>{a.consumption.reply} credit / reply</strong> · <strong style={{ color: "#9db3c4" }}>{a.consumption.callPerMin} credits / min</strong> of AI call.
+                                    </div>
+                                    <div style={{ borderTop: "1px dashed #1c2836", paddingTop: 10 }}>
+                                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+                                        <div>
+                                          <div style={{ fontSize: 12, fontWeight: 600, color: "#e4eaf0" }}>Additional credits (optional)</div>
+                                          <div style={{ fontSize: 10.5, color: "#4a6070", marginTop: 2 }}>₹{AI_CREDIT_RATE.toFixed(2)} / credit · wallet-funded · rolls over monthly</div>
+                                        </div>
+                                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                          <input type="number" min={0} step={500} value={extra === 0 ? "" : extra}
+                                            onChange={e => { const v = parseInt(e.target.value, 10); setAiExtraCredits(e.target.value === "" ? 0 : (isNaN(v) || v < 0 ? 0 : v)); }}
+                                            placeholder="0" style={{ width: 110, background: "#0b1015", border: "1px solid #1c2836", borderRadius: 8, color: "#e4eaf0", fontSize: 13, fontWeight: 600, padding: "8px 10px", outline: "none", fontFamily: "inherit" }} />
+                                          <span style={{ fontSize: 11.5, color: "#4a6070" }}>credits</span>
+                                        </div>
+                                      </div>
+                                      {extra > 0 && (
+                                        <div style={{ display: "flex", alignItems: "baseline", justifyContent: "flex-end", gap: 6, marginTop: 8 }}>
+                                          <span style={{ fontSize: 10.5, color: "#4a6070" }}>{fmtINR(extra)} × ₹{AI_CREDIT_RATE.toFixed(2)} =</span>
+                                          <span style={{ fontSize: 15, fontWeight: 700, color: "#21c47a" }}>₹{fmtINR(extraCost)}</span>
+                                          <span style={{ fontSize: 10.5, color: "#3d5264" }}>one-time</span>
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                );
+                              })()}
                               {/* Quantity row */}
                               {on && a.perUnit && unitPrice != null && (
                                 <div style={{ borderTop: `1px solid ${T.border}`, padding: "10px 16px", background: "rgba(23,160,102,0.04)", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
@@ -3180,6 +3301,14 @@ Rules: No preamble. No closing line. No markdown. No asterisks. Start directly w
                           <span style={{ fontSize: 12.5, color: "#e4eaf0", fontWeight: 600 }}>{ca.price ? `₹${Number(ca.price).toLocaleString("en-IN")}` : "—"}</span>
                         </div>
                       ))}
+                      {aiExtraCreditsQty > 0 && (
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 7 }}>
+                          <span style={{ fontSize: 12.5, color: "#6d8497", flex: 1, paddingRight: 10 }}>
+                            Additional AI Credits<span style={{ color: "#3d5264", fontSize: 11 }}> ×{fmtINR(aiExtraCreditsQty)}</span>
+                          </span>
+                          <span style={{ fontSize: 12.5, color: "#e4eaf0", fontWeight: 600, flexShrink: 0 }}>₹{fmtINR(aiExtraCreditsAmount)}</span>
+                        </div>
+                      )}
                       {/* Subtotals */}
                       {totalAddonSaving > 0 && (
                         <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6, padding: "8px 10px", background: "rgba(23,160,102,0.06)", borderRadius: 7 }}>
