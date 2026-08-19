@@ -3203,8 +3203,8 @@ Rules: No preamble. No closing line. No markdown. No asterisks. Start directly w
                   <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr 1fr", gap: 10 }}>
                     {Object.entries(PLANS).map(([key, p]) => {
                       const isEnt = key === "enterprise";
-                      const basePrice = isEnt ? (parseInt(enterpriseCustomPrice.replace(/[^0-9]/g, ""), 10) || null) : (p[billing] ?? p.quarterly);
-                      const aiExtra = isEnt && enterpriseAIBots ? (billing === "quarterly" ? 45000 : billing === "yearly" ? 180000 : 15000) : 0;
+                      const basePrice = isEnt ? (parseInt(enterpriseCustomPrice.replace(/[^0-9]/g, ""), 10) || null) : (isINR(region) ? (p[billing] ?? p.quarterly) : getPlanPriceRegional(key, billing, region));
+                      const aiExtra = isEnt && enterpriseAIBots && isINR(region) ? (billing === "quarterly" ? 45000 : billing === "yearly" ? 180000 : 15000) : 0;
                       const displayPrice = basePrice != null ? basePrice + aiExtra : null;
                       const isSelected = plan === key;
                       const billingShort = billing === "monthly" ? "mo" : billing === "quarterly" ? "qtr" : billing === "halfYearly" ? "6mo" : "yr";
@@ -3223,7 +3223,7 @@ Rules: No preamble. No closing line. No markdown. No asterisks. Start directly w
                               <div>
                                 <div style={{ fontSize: 11, color: "#64748b", marginBottom: 6 }}>Custom {billing} price</div>
                                 <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                                  <span style={{ fontSize: 14, fontWeight: 700, color: T.white }}>₹</span>
+                                  <span style={{ fontSize: 14, fontWeight: 700, color: T.white }}>{REGIONS[region].symbol.trim()}</span>
                                   <input value={enterpriseCustomPrice} onChange={e => setEnterpriseCustomPrice(e.target.value)} onClick={e => e.stopPropagation()} placeholder="45,000" style={{ width: "100%", padding: "6px 8px", background: "#0d1520", border: `1.5px solid ${T.green}`, borderRadius: 7, color: T.white, fontSize: 14, fontWeight: 700, outline: "none", fontFamily: "inherit" }} />
                                 </div>
                                 {enterpriseCustomPrice && (() => {
@@ -3234,37 +3234,23 @@ Rules: No preamble. No closing line. No markdown. No asterisks. Start directly w
                                         {money(raw)}
                                         <span style={{ fontSize: 11, fontWeight: 400, color: "#64748b", marginLeft: 4 }}>/{billingShort}</span>
                                       </div>
-                                      <div style={{ fontSize: 10.5, color: "#64748b", marginTop: 3 }}>+GST · {money(Math.round(raw * 1.18))} total</div>
+                                      <div style={{ fontSize: 10.5, color: "#64748b", marginTop: 3 }}>{isINR(region) ? `+GST · ${money(Math.round(raw * 1.18))} total` : "Tax as applicable"}</div>
                                     </div>
                                   ) : null;
                                 })()}
-                                <div style={{ fontSize: 10, color: enterpriseAIBots ? T.greenLt : "#475569", marginTop: 4 }}>{enterpriseAIBots ? `+₹${billing==="yearly"?"1,80,000":billing==="quarterly"?"45,000":"15,000"} AI Bots` : "without AI Bots"}</div>
                               </div>
                             ) : (
                               <div>
                                 {discount > 0 && <div style={{ fontSize: 11, color: "#475569", textDecoration: "line-through", marginBottom: 2 }}>{money(displayPrice ?? 0)}</div>}
                                 <div style={{ fontSize: 22, fontWeight: 800, color: isSelected ? T.greenLt : "#f8fafc", letterSpacing: "-0.5px" }}>{money(discountedPrice)}</div>
                                 {discount > 0 && <div style={{ fontSize: 10, color: T.greenLt, fontWeight: 600, marginTop: 1 }}>{discount}% off</div>}
-                                <div style={{ fontSize: 10.5, color: "#64748b", marginTop: 3 }}>+GST · {money(Math.round(discountedPrice * 1.18))} total</div>
+                                <div style={{ fontSize: 10.5, color: "#64748b", marginTop: 3 }}>{isINR(region) ? `+GST · ${money(Math.round(discountedPrice * 1.18))} total` : "Tax as applicable"}</div>
                               </div>
                             )}
                             {isEnt && isSelected && enterpriseCustomPrice && (
                               <EnterpriseTierBadge customPrice={enterpriseCustomPrice} billing={billing} />
                             )}
                           </div>
-                          {/* Enterprise AI Bots toggle below card when selected */}
-                          {isSelected && isEnt && (
-                            <div style={{ marginTop: 8, padding: "11px 14px", background: T.surfaceHigh, borderRadius: 9, border: `1px solid ${T.borderMed}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                              <div>
-                                <div style={{ fontSize: 12.5, fontWeight: 600, color: T.text }}>AI Chat Bots?</div>
-                                <div style={{ fontSize: 10.5, color: T.textMuted, marginTop: 1 }}>+₹15k/mo · ChatGPT Plus req.</div>
-                              </div>
-                              <div style={{ display: "flex", gap: 6 }}>
-                                <button onClick={e => { e.stopPropagation(); setEnterpriseAIBots(false); }} style={{ padding: "5px 12px", borderRadius: 6, border: `1.5px solid ${!enterpriseAIBots ? T.green : T.border}`, background: !enterpriseAIBots ? "rgba(23,160,102,0.1)" : "transparent", color: !enterpriseAIBots ? T.greenLt : T.textSub, cursor: "pointer", fontSize: 12, fontWeight: 600 }}>No</button>
-                                <button onClick={e => { e.stopPropagation(); setEnterpriseAIBots(true); }} style={{ padding: "5px 12px", borderRadius: 6, border: `1.5px solid ${enterpriseAIBots ? T.green : T.border}`, background: enterpriseAIBots ? "rgba(23,160,102,0.1)" : "transparent", color: enterpriseAIBots ? T.greenLt : T.textSub, cursor: "pointer", fontSize: 12, fontWeight: 600 }}>Yes</button>
-                              </div>
-                            </div>
-                          )}
                         </div>
                       );
                     })}
